@@ -18,7 +18,7 @@ Aby uruchomić projekt lokalnie, wykonaj poniższe kroki:
 ### 1. Sklonuj repozytorium
 
 ```bash
-git clone https://github.com/jakurych/win-a-day.git
+git clone https://github.com/WhiteWolfWCY/win-a-day.git
 ```
 
 ### 2. Przejdź do katalogu projektu
