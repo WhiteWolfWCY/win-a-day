@@ -56,7 +56,7 @@ export default function Home() {
       <main className="container mx-auto flex-grow flex flex-col justify-center px-6">
         <div className="flex flex-col">
           <motion.h1
-            className="text-5xl md:text-7xl font-bold leading-tight text-center mt-20 md:mt-0"
+            className="text-5xl md:text-7xl font-bold leading-tight text-center mt-12 sm:mt-20"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
