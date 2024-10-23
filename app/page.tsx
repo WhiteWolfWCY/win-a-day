@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ArrowRight, Award, Calendar, TrendingUp, Star, BarChart, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
@@ -38,10 +39,17 @@ export default function Home() {
             <Calendar className="h-8 w-8 text-yellow-500" />
             <span className="font-bold text-2xl">Win a Day</span>
           </Link>
-          <Button className="flex items-center justify-center hover:bg-yellow-600">
-            Dive in
-            <ArrowRight className="h-10 w-10" />
-          </Button>
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/dashboard">
+              <Button size="sm" className="flex items-center justify-center hover:bg-yellow-600">
+                Dive in
+                <ArrowRight className="h-10 w-10" />
+              </Button>
+            </Link>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </div>
         </div>
       </header>
 
@@ -78,7 +86,7 @@ export default function Home() {
                   size="lg"
                   className="bg-yellow-500 hover:bg-yellow-600 text-white"
                 >
-                  <Link href="/login">
+                  <Link href="/dashboard">
                     Start Your Journey <ArrowRight className="h-8 w-8" />
                   </Link>
                 </Button>
