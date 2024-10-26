@@ -2,6 +2,7 @@ import { boolean, date, integer } from "drizzle-orm/pg-core";
 import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { pgEnum } from "drizzle-orm/pg-core";
 
+
 export enum GoalPriority {
     LOW = "Low",
     MEDIUM = "Medium",
@@ -52,7 +53,7 @@ export const Goals = pgTable("goals", {
     priority: goalPriorityEnum("priority").notNull(),
     habitId: integer().references(() => Habits.id),
     goalSuccess: integer().notNull(),
-    weekDays: weekDaysEnum("weekdays").array()
+    weekDays: weekDaysEnum("weekdays").array() 
 });
 
 
