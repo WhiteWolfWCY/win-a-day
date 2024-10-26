@@ -15,6 +15,13 @@
       "when": 1729941910999,
       "tag": "0001_gorgeous_goliath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1729944716146,
+      "tag": "0002_naive_master_mold",
+      "breakpoints": true
     }
   ]
 }

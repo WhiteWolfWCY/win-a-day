@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { GoalsAttempts, Goals, Habits, Categories, Users } from "@/db/schema";
+import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays } from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 
@@ -104,7 +104,7 @@ export async function getLastThreeHabits(userId: string) {
 //create a Goal
 export async function createGoal(goalData: NewGoal) {
   const [newGoal] = await db.insert(Goals).values(goalData).returning();
-  await createGoalAttemptsForGoal(newGoal.id); //utwórz obiekty GoalsAttempts dla nowego celu
+  await createGoalAttemptsForGoal(newGoal.id);
   return newGoal;
 }
 
@@ -116,13 +116,28 @@ export async function getAllUserGoals(userId: string) {
 }
 
 //update a goal
-export async function updateGoal(goalId: string, goalData: Partial<NewGoal>) {
-  const [updatedGoal] = await db.update(Goals).set(goalData).where(eq(Goals.id, goalId)).returning();
+export async function updateGoal(goalData: {
+  id: string;
+  name: string;
+  habitId: string;
+  priority: GoalPriority;
+  startDate: string;
+  finishDate: string;
+  goalSuccess: number;
+  weekDays: WeekDays[];
+}) {
+  const [updatedGoal] = await db
+    .update(Goals)
+    .set(goalData)
+    .where(eq(Goals.id, goalData.id))
+    .returning();
+  await updateGoalAttemptsForGoal(updatedGoal.id);
   return updatedGoal;
 }
 
 //delete a goal
 export async function deleteGoal(goalId: string) {
+  await db.delete(GoalsAttempts).where(eq(GoalsAttempts.goalId, goalId));
   await db.delete(Goals).where(eq(Goals.id, goalId));
 }
 
@@ -194,57 +209,29 @@ export async function deleteCategory(categoryId: string) {
 //create a Goal Attempt
 
 export async function createGoalAttemptsForGoal(goalId: string) {
-  // Retrieve the goal
   const [goal] = await db.select().from(Goals).where(eq(Goals.id, goalId));
-  const { startDate, finishDate, weekDays } = goal;  
-  //Mapa dni tygodnia do liczb
-  const weekDayNumbers = weekDays?.map((wd) => {
-    switch (wd) {
-      case "Sunday":
-        return 0;
-      case "Monday":
-        return 1;
-      case "Tuesday":
-        return 2;
-      case "Wednesday":
-        return 3;
-      case "Thursday":
-        return 4;
-      case "Friday":
-        return 5;
-      case "Saturday":
-        return 6;
-      default:
-        return 0;
-        throw new Error(`Invalid weekday: ${wd}`);
-    }
-  });
+  const { startDate, finishDate, weekDays } = goal;
 
-  const currentDate = new Date(startDate);
-  const endDate = new Date(finishDate);
-
-  //godzina 00:00:00 
-  currentDate.setHours(0, 0, 0, 0);
-  endDate.setHours(0, 0, 0, 0);
+  const startDateObj = new Date(startDate);
+  const endDateObj = new Date(finishDate);
 
   const goalAttemptsToInsert: NewGoalAttempt[] = [];
 
-  while (currentDate <= endDate) {
-    const dayOfWeek = currentDate.getDay(); // 0 (Sunday) to 6 (Saturday)
-    if (weekDayNumbers?.includes(dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6)) {
-      // Create a GoalAttempt for this date
+  for (let date = startDateObj; date <= endDateObj; date.setDate(date.getDate() + 1)) {
+    const dayOfWeek = date.getDay();
+    // Adjust the mapping to align with our WeekDays enum
+    const weekDay = Object.values(WeekDays)[(dayOfWeek + 6) % 7];
+    
+    if (weekDays!.includes(weekDay)) {
       goalAttemptsToInsert.push({
         goalId: goal.id,
-        date: currentDate.toISOString(), // Convert Date to ISO string
+        date: date.toISOString().split('T')[0],
         isCompleted: false,
         note: "",
       });
     }
-    // Move to the next day
-    currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  // Bulk insert GoalAttempts
   if (goalAttemptsToInsert.length > 0) {
     await db.insert(GoalsAttempts).values(goalAttemptsToInsert);
   }
@@ -308,6 +295,38 @@ export async function updateHabit(habitData: {
   return updatedHabit;
 }
 
+// get recent goals for user
+export async function getRecentGoalsForUser(userId: string) {
+  const goals = await db.select({
+    id: Goals.id,
+    name: Goals.name,
+    habitId: Goals.habitId,
+    habitName: Habits.name,
+    priority: Goals.priority,
+    startDate: Goals.startDate,
+    finishDate: Goals.finishDate,
+    goalSuccess: Goals.goalSuccess,
+    weekDays: Goals.weekDays,
+  }).from(Goals)
+    .innerJoin(Habits, eq(Goals.habitId, Habits.id))
+    .where(eq(Goals.userId, userId))
+    .orderBy(desc(Goals.createdAt))
+    .limit(4);
+  
+  return goals;
+}
+
+// update goal attempts for a goal
+export async function updateGoalAttemptsForGoal(goalId: string) {
+ await db.select().from(Goals).where(eq(Goals.id, goalId));
+
+  // Delete existing goal attempts
+  await db.delete(GoalsAttempts).where(eq(GoalsAttempts.goalId, goalId));
+
+  // Create new goal attempts
+  await createGoalAttemptsForGoal(goalId);
+}
+
 /*
 
 1. CRUD dla każdego z elementów czyli: Habits, Goals, Categories, Users 
@@ -321,6 +340,8 @@ export async function updateHabit(habitData: {
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
+
 
 
 

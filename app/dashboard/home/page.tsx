@@ -1,6 +1,7 @@
 "use client";
 
 import NewestHabits from "@/components/NewestHabits";
+import RecentGoals from "@/components/RecentGoals";
 import OverviewSection from "@/components/OverviewSection";
 
 export default function DashboardPage() {
@@ -9,6 +10,7 @@ export default function DashboardPage() {
       <OverviewSection />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <NewestHabits />
+        <RecentGoals />
       </div>
     </main>
   );
