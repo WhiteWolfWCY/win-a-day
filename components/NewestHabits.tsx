@@ -74,6 +74,7 @@ export default function NewestHabits() {
             <AddHabitDialog
               isDialogOpen={isDialogOpen}
               setIsDialogOpen={setIsDialogOpen}
+              showAddButton={true}
             />
           </div>
         )}
