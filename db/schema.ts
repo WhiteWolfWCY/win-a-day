@@ -40,7 +40,8 @@ export const Habits = pgTable("habits", {
     name: text("name").notNull(),
     categoryId: uuid("categoryId").references(() => Categories.id),
     userId: text("userId").references(() => Users.id),
-    isGoodHabit: boolean("isGoodHabit").default(true)
+    isGoodHabit: boolean("isGoodHabit").default(true),
+    createdAt: date("createdAt").defaultNow()
 });
 
 export const Goals = pgTable("goals", {

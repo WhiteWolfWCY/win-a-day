@@ -8,6 +8,13 @@
       "when": 1729940045321,
       "tag": "0000_tranquil_stick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1729941910999,
+      "tag": "0001_gorgeous_goliath",
+      "breakpoints": true
     }
   ]
 }
