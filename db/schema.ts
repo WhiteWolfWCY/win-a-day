@@ -54,7 +54,8 @@ export const Goals = pgTable("goals", {
     priority: goalPriorityEnum("priority").notNull(),
     habitId: uuid("habitId").references(() => Habits.id),
     goalSuccess: integer("goalSuccess").notNull(),
-    weekDays: weekDaysEnum("weekdays").array() 
+    weekDays: weekDaysEnum("weekdays").array(),
+    createdAt: date("createdAt").defaultNow()
 });
 
 
