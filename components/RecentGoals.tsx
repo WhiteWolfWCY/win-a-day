@@ -23,7 +23,16 @@ export default function RecentGoals() {
   });
 
   const getWeekDaysString = (weekDays: WeekDays[]) => {
-    return weekDays.map(day => day.slice(0, 3)).join(", ");
+    const fullDayNames = {
+      [WeekDays.MONDAY]: "Monday",
+      [WeekDays.TUESDAY]: "Tuesday",
+      [WeekDays.WEDNESDAY]: "Wednesday",
+      [WeekDays.THURSDAY]: "Thursday",
+      [WeekDays.FRIDAY]: "Friday",
+      [WeekDays.SATURDAY]: "Saturday",
+      [WeekDays.SUNDAY]: "Sunday",
+    };
+    return weekDays.map(day => fullDayNames[day]).join(", ");
   };
 
   return (
@@ -36,11 +45,11 @@ export default function RecentGoals() {
           </Button>
         </Link>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-full">
         {isLoading ? (
           <Loader />
         ) : goals && goals.length > 0 ? (
-          <>
+          <div className="h-full flex flex-col justify-between pb-16">
             {goals?.map((goal, index) => (
               <div key={index} className="flex flex-col py-4">
                 <div className="flex items-center justify-between">
@@ -73,9 +82,9 @@ export default function RecentGoals() {
             >
               <Plus className="mr-2 h-4 w-4" /> Add Goal
             </Button>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="h-full flex flex-col justify-between pb-16">
             <p className="text-sm text-gray-500">No goals found</p>
             <Button
               className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-white"
@@ -83,7 +92,7 @@ export default function RecentGoals() {
             >
               <Plus className="mr-2 h-4 w-4" /> Add Goal
             </Button>
-          </>
+          </div>
         )}
 
         <GoalDialog

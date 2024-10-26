@@ -3,6 +3,7 @@
 import NewestHabits from "@/components/NewestHabits";
 import RecentGoals from "@/components/RecentGoals";
 import OverviewSection from "@/components/OverviewSection";
+import GoalsForDays from "@/components/GoalsForDays";
 
 export default function DashboardPage() {
   return (
@@ -12,6 +13,7 @@ export default function DashboardPage() {
         <NewestHabits />
         <RecentGoals />
       </div>
+      <GoalsForDays />
     </main>
   );
 }

@@ -62,13 +62,13 @@ export default function NewestHabits() {
               />
           </div>
         ) : (
-          <>
+          <div className="h-full flex flex-col justify-between pb-16">
             <p className="text-sm text-gray-500">No habits found</p>
             <AddHabitDialog
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}
               />
-          </>
+          </div>
         )}
       </CardContent>
     </Card>
