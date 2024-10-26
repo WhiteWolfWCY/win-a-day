@@ -32,7 +32,8 @@ export const Users = pgTable("users", {
 export const Categories = pgTable("categories", {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
-    userId: text("userId").references(() => Users.id)
+    userId: text("userId").references(() => Users.id),
+    icon: text("icon").notNull().default('📁'), // Default to a folder emoji
 });
 
 export const Habits = pgTable("habits", {

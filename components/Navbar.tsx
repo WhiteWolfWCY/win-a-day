@@ -2,10 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import { UserButton } from "@clerk/nextjs";
-import { BarChart2, CalendarIcon, CheckCircle, Home, Users, Menu, X } from "lucide-react";
+import { BarChart2, CalendarIcon, CheckCircle, Home, Users, Menu, X, Goal, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Button } from "./ui/button";
 
 export default function Navbar() {
     const pathname = usePathname();
@@ -14,6 +15,7 @@ export default function Navbar() {
     const navItems = [
         { href: "/dashboard/home", icon: Home, label: "Dashboard" },
         { href: "/dashboard/habits", icon: CheckCircle, label: "Habits" },
+        { href: "/dashboard/goals", icon: Goal, label: "Goals" },
         { href: "/dashboard/community", icon: Users, label: "Community" },
         { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
     ];
@@ -55,7 +57,10 @@ export default function Navbar() {
                             </Link>
                         ))}
                     </nav>
-                    <div className="lg:flex-1 flex justify-end">
+                    <div className="lg:flex-1 flex justify-end items-center gap-4">
+                        <Link href="/dashboard/settings">
+                            <Settings className="h-6 w-6 text-gray-600 hover:text-yellow-500    " />
+                        </Link>
                         <UserButton />
                     </div>
                 </div>

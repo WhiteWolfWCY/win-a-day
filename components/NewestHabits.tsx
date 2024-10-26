@@ -10,6 +10,7 @@ import { getRecentHabitsForUser } from "@/actions/actions";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "./Loader";
 import Link from "next/link";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function NewestHabits() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -34,7 +35,7 @@ export default function NewestHabits() {
           <Loader />
         ) : habits && habits.length > 0 ? (
           <div className="flex flex-col h-full justify-between pb-16">
-          {habits?.map((habit, index) => (
+            {habits?.map((habit, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between py-2"
@@ -42,10 +43,15 @@ export default function NewestHabits() {
                 <div>
                   <h3 className="font-semibold">{habit.habitName}</h3>
                   <p className="text-sm text-gray-500">
-                    Category: {habit.habitCategory}
+                    Category: {habit.habitCategoryIcon} {habit.habitCategory}
                   </p>
-                  <p className="text-sm text-gray-500">
-                    Type: {habit.habitType ? "Good" : "Bad"}
+                  <p className="text-sm text-gray-500 flex items-center">
+                    Good habit:{" "}
+                    {habit.habitType ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500 ml-1" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-500 ml-1" />
+                    )}
                   </p>
                 </div>
                 <HabitMenu
@@ -55,19 +61,19 @@ export default function NewestHabits() {
                   isGoodHabit={habit.habitType || false}
                 />
               </div>
-          ))}
-              <AddHabitDialog
-                isDialogOpen={isDialogOpen}
-                setIsDialogOpen={setIsDialogOpen}
-              />
+            ))}
+            <AddHabitDialog
+              isDialogOpen={isDialogOpen}
+              setIsDialogOpen={setIsDialogOpen}
+            />
           </div>
         ) : (
           <div className="h-full flex flex-col justify-between pb-16">
             <p className="text-sm text-gray-500">No habits found</p>
             <AddHabitDialog
-                isDialogOpen={isDialogOpen}
-                setIsDialogOpen={setIsDialogOpen}
-              />
+              isDialogOpen={isDialogOpen}
+              setIsDialogOpen={setIsDialogOpen}
+            />
           </div>
         )}
       </CardContent>
