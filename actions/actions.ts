@@ -2,7 +2,7 @@
 
 import { db } from "@/db/drizzle";
 import { GoalsAttempts, Goals, Habits, Categories, Users } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 
 
@@ -59,8 +59,25 @@ export async function createHabit(habitData: NewHabit) {
 }
 
 //get all habits
-export async function getAllHabits() {
-  const habits = await db.select().from(Habits);
+export async function getAllHabitsForUser(userId: string) {
+  const habits = await db.select().from(Habits).where(eq(Habits.userId, userId));
+  return habits;
+}
+
+// get 4 recent habits
+export async function getRecentHabitsForUser(userId: string) {
+  const habits = await db.select({
+    habitId: Habits.id,
+    habitName: Habits.name,
+    habitCategory: Categories.name,
+    habitCategoryId: Categories.id, 
+    habitType: Habits.isGoodHabit,
+  }).from(Habits)
+    .innerJoin(Categories, eq(Habits.categoryId, Categories.id))
+    .where(eq(Habits.userId, userId))
+    .orderBy(desc(Habits.createdAt))
+    .limit(4);
+  
   return habits;
 }
 
@@ -68,12 +85,6 @@ export async function getAllHabits() {
 export async function getUserHabits(userId: string) {
   const habits = await db.select().from(Habits).where(eq(Habits.userId, userId));
   return habits;
-}
-
-//update a habit
-export async function updateHabit(habitId: string, habitData: Partial<NewHabit>) {
-  const [updatedHabit] = await db.update(Habits).set(habitData).where(eq(Habits.id, habitId)).returning();
-  return updatedHabit;
 }
 
 //delete a habit
@@ -157,7 +168,13 @@ export async function createCategory(categoryData: NewCategory) {
 
 //get user categories
 export async function getUserCategories(userId: string) {
-  const categories = await db.select().from(Categories).where(eq(Categories.userId, userId));
+  const categories = await db
+    .select({
+      id: Categories.id,
+      name: Categories.name,
+    })
+    .from(Categories)
+    .where(eq(Categories.userId, userId));
   return categories;
 }
 
@@ -239,7 +256,57 @@ export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: 
   return updatedGoalAttempt;
 }
 
+export async function createHabitWithCategory(habitData: {
+  name: string;
+  category: string;
+  userId: string;
+  isGoodHabit: boolean;
+}) {
+  // First, find or create the category
+  let [category] = await db
+    .select()
+    .from(Categories)
+    .where(and(eq(Categories.name, habitData.category), eq(Categories.userId, habitData.userId)))
+    .limit(1);
+  
+  if (!category) {
+    [category] = await db.insert(Categories).values({
+      name: habitData.category,
+      userId: habitData.userId
+    }).returning();
+  }
 
+  // Now create the habit
+  const [newHabit] = await db
+    .insert(Habits)
+    .values({
+      name: habitData.name,
+      categoryId: category.id,
+      userId: habitData.userId,
+      isGoodHabit: habitData.isGoodHabit,
+    })
+    .returning();
+  
+  return newHabit;
+}
+
+export async function updateHabit(habitData: {
+  id: string;
+  name: string;
+  categoryId: string;
+  isGood: boolean;
+}) {
+  const [updatedHabit] = await db
+    .update(Habits)
+    .set({
+      name: habitData.name,
+      categoryId: habitData.categoryId,
+      isGoodHabit: habitData.isGood,
+    })
+    .where(eq(Habits.id, habitData.id))
+    .returning();
+  return updatedHabit;
+}
 
 /*
 
@@ -254,6 +321,9 @@ export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: 
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
+
+
 
 
 
