@@ -16,6 +16,7 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { NotebookIcon, Loader2, StickyNoteIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { isFuture } from 'date-fns';
 
 export default function GoalsForDays() {
   const {userId} = useAuth();
@@ -39,6 +40,8 @@ export default function GoalsForDays() {
       queryClient.invalidateQueries({ queryKey: ['recent-goals'] });
       queryClient.invalidateQueries({ queryKey: ['goal-completion', userId] });
       queryClient.invalidateQueries({ queryKey: ['habit-adherence', userId] });
+      queryClient.invalidateQueries({ queryKey: ['goalAttempts'] });
+      queryClient.invalidateQueries({ queryKey: ['goal-completion-rate'] });
     },
   });
 
@@ -119,10 +122,12 @@ export default function GoalsForDays() {
                       >
                         <NotebookIcon className="h-4 w-4" />
                       </Button>
-                      <Checkbox
-                        checked={attempt.goalAttempt.isCompleted || false}
-                        onCheckedChange={(checked) => toggleGoalCompletion(attempt.goalAttempt.id, checked as boolean)}
-                      />
+                      {!isFuture(new Date(attempt.goalAttempt.date)) && (
+                        <Checkbox
+                          checked={attempt.goalAttempt.isCompleted || false}
+                          onCheckedChange={(checked) => toggleGoalCompletion(attempt.goalAttempt.id, checked as boolean)}
+                        />
+                      )}
                     </div>
                   </div>
                 ))}
