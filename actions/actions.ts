@@ -11,6 +11,17 @@ type NewGoal = Omit<InferInsertModel<typeof Goals>, 'id'>;
 type NewCategory = Omit<InferInsertModel<typeof Categories>, 'id'>;
 type NewGoalAttempt = Omit<InferInsertModel<typeof GoalsAttempts>, 'id'>;
 
+type AdherenceStats = {
+  goodHabits: number;
+  goodHabitsTotal: number;
+  badHabits: number;
+  badHabitsTotal: number;
+};
+
+type AdherenceByDate = {
+  [date: string]: AdherenceStats;
+};
+
 //USERS
 
 // Create a User
@@ -384,6 +395,78 @@ export async function getUserGoalsForDay(date: string, userId: string) {
   return goalAttemptsForDay;
 }
 
+// Get overall goal completion statistics
+export async function getOverallGoalCompletion(userId: string) {
+  const result = await db
+    .select({
+      totalAttempts: sql`COUNT(*)`,
+      completedAttempts: sql`SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END)`,
+    })
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+    .where(eq(Goals.userId, userId));
+
+  const { totalAttempts, completedAttempts } = result[0];
+  return {
+    completed: Number(completedAttempts),
+    remaining: Number(totalAttempts) - Number(completedAttempts),
+  };
+}
+
+// Get habit adherence for the last 14 days
+export async function getHabitAdherenceLastTwoWeeks(userId: string) {
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 13); // Set to 13 days ago to include today
+
+  const result = await db
+    .select({
+      date: GoalsAttempts.date,
+      isGoodHabit: Habits.isGoodHabit,
+      isCompleted: GoalsAttempts.isCompleted,
+    })
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+    .innerJoin(Habits, eq(Habits.id, Goals.habitId))
+    .where(
+      and(
+        eq(Goals.userId, userId),
+        sql`${GoalsAttempts.date} >= ${twoWeeksAgo.toISOString().split('T')[0]}`
+      )
+    )
+    .orderBy(GoalsAttempts.date);
+
+  const adherenceByDate = result.reduce<AdherenceByDate>((acc, { date, isGoodHabit, isCompleted }) => {
+    const dateStr = new Date(date).toISOString().split('T')[0];
+    if (!acc[dateStr]) {
+      acc[dateStr] = { goodHabits: 0, goodHabitsTotal: 0, badHabits: 0, badHabitsTotal: 0 };
+    }
+    if (isGoodHabit) {
+      acc[dateStr].goodHabitsTotal++;
+      if (isCompleted) acc[dateStr].goodHabits++;
+    } else {
+      acc[dateStr].badHabitsTotal++;
+      if (isCompleted) acc[dateStr].badHabits++;
+    }
+    return acc;
+  }, {});
+
+  // Fill in missing dates
+  for (let d = new Date(twoWeeksAgo); d <= new Date(); d.setDate(d.getDate() + 1)) {
+    const dateStr = d.toISOString().split('T')[0];
+    if (!adherenceByDate[dateStr]) {
+      adherenceByDate[dateStr] = { goodHabits: 0, goodHabitsTotal: 0, badHabits: 0, badHabitsTotal: 0 };
+    }
+  }
+
+  return Object.entries(adherenceByDate)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, stats]) => ({
+      date,
+      goodHabits: stats.goodHabitsTotal > 0 ? (stats.goodHabits / stats.goodHabitsTotal) * 100 : 0,
+      badHabits: stats.badHabitsTotal > 0 ? (stats.badHabits / stats.badHabitsTotal) * 100 : 0,
+    }));
+}
+
 /*
 
 1. CRUD dla każdego z elementów czyli: Habits, Goals, Categories, Users 
@@ -397,6 +480,8 @@ export async function getUserGoalsForDay(date: string, userId: string) {
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
+
 
 
 
