@@ -2,8 +2,9 @@
 
 import { db } from "@/db/drizzle";
 import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays } from "@/db/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
+import { parseISO } from 'date-fns';
 
 
 type NewHabit = Omit<InferInsertModel<typeof Habits>, 'id'>;
@@ -388,7 +389,7 @@ export async function getUserGoalsForDay(date: string, userId: string) {
     .where(
       and(
         eq(GoalsAttempts.date, date),
-        eq(Goals.userId, userId) // Replace with actual user ID retrieval method
+        eq(Goals.userId, userId) 
       )
     );
 
@@ -413,10 +414,9 @@ export async function getOverallGoalCompletion(userId: string) {
   };
 }
 
-// Get habit adherence for the last 14 days
 export async function getHabitAdherenceLastTwoWeeks(userId: string) {
   const twoWeeksAgo = new Date();
-  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 13); // Set to 13 days ago to include today
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 13); 
 
   const result = await db
     .select({
@@ -450,7 +450,6 @@ export async function getHabitAdherenceLastTwoWeeks(userId: string) {
     return acc;
   }, {});
 
-  // Fill in missing dates
   for (let d = new Date(twoWeeksAgo); d <= new Date(); d.setDate(d.getDate() + 1)) {
     const dateStr = d.toISOString().split('T')[0];
     if (!adherenceByDate[dateStr]) {
@@ -467,6 +466,178 @@ export async function getHabitAdherenceLastTwoWeeks(userId: string) {
     }));
 }
 
+export async function getHabitStreaks(userId: string) {
+  const habits = await getAllHabitsForUser(userId);
+  const streaks = await Promise.all(habits.map(async (habit) => {
+    const attempts = await db
+      .select({
+        date: GoalsAttempts.date,
+        isCompleted: GoalsAttempts.isCompleted,
+      })
+      .from(GoalsAttempts)
+      .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+      .where(and(eq(Goals.habitId, habit.id), eq(GoalsAttempts.isCompleted, true)))
+      .orderBy(desc(GoalsAttempts.date));
+
+    let currentStreak = 0;
+    let maxStreak = 0;
+    let lastDate = new Date();
+
+    for (const attempt of attempts) {
+      const attemptDate = new Date(attempt.date);
+      const dayDiff = Math.floor((lastDate.getTime() - attemptDate.getTime()) / (1000 * 3600 * 24));
+      
+      if (dayDiff <= 1) {
+        currentStreak++;
+        maxStreak = Math.max(maxStreak, currentStreak);
+      } else {
+        break;
+      }
+      lastDate = attemptDate;
+    }
+
+    return { habitName: habit.name, currentStreak, maxStreak };
+  }));
+
+  return streaks;
+}
+
+type CompletionRate = {
+  totalAttempts: number;
+  completedAttempts: number;
+};
+
+type DailyCompletionRate = {
+  date: string;  
+  totalAttempts: number;
+  completedAttempts: number;
+};
+
+// Get category performance
+export async function getCategoryPerformance(userId: string) {
+  const categories = await getUserCategories(userId);
+  const performance = await Promise.all(categories.map(async (category) => {
+    const habits = await db
+      .select({
+        id: Habits.id,
+      })
+      .from(Habits)
+      .where(and(
+        eq(Habits.categoryId, category.id),
+        eq(Habits.userId, userId)
+      ));
+
+    const habitIds = habits.map(h => h.id);
+
+    if (habitIds.length === 0) {
+      return { categoryName: category.name, completionRate: 0 };
+    }
+
+    const completionRate = await db
+      .select({
+        totalGoals: sql<number>`CAST(COUNT(DISTINCT ${Goals.id}) AS INTEGER)`,
+        completedGoals: sql<number>`CAST(SUM(CASE WHEN ${Goals.isCompleted} THEN 1 ELSE 0 END) AS INTEGER)`,
+      })
+      .from(Goals)
+      .where(and(
+        eq(Goals.userId, userId),
+        inArray(Goals.habitId, habitIds)
+      ));
+
+    const rate = completionRate[0].totalGoals > 0
+      ? (completionRate[0].completedGoals / completionRate[0].totalGoals) * 100
+      : 0;
+
+    return { categoryName: category.name, completionRate: rate };
+  }));
+
+  return performance;
+}
+
+// Get goal completion rate over time
+export async function getGoalCompletionRateOverTime(userId: string) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const completionRates = await db
+    .select({
+      date: GoalsAttempts.date,
+      totalAttempts: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+      completedAttempts: sql<number>`CAST(SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END) AS INTEGER)`,
+    })
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+    .where(and(
+      eq(Goals.userId, userId),
+      sql`${GoalsAttempts.date} >= ${thirtyDaysAgo.toISOString().split('T')[0]}`
+    ))
+    .groupBy(GoalsAttempts.date)
+    .orderBy(GoalsAttempts.date) as DailyCompletionRate[];
+
+  return completionRates.map(rate => ({
+    date: rate.date,
+    completionRate: rate.totalAttempts > 0
+      ? (rate.completedAttempts / rate.totalAttempts) * 100
+      : 0
+  }));
+}
+
+// Get habit balance
+export async function getHabitBalance(userId: string) {
+  const habits = await getAllHabitsForUser(userId);
+  const goodHabits = habits.filter(h => h.isGoodHabit).length;
+  const badHabits = habits.length - goodHabits;
+
+  const completionRates = await db
+    .select({
+      isGoodHabit: Habits.isGoodHabit,
+      totalAttempts: sql<number>`CAST(COUNT(DISTINCT ${Goals.id}) AS INTEGER)`,
+      completedAttempts: sql<number>`CAST(SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END) AS INTEGER)`,
+    })
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+    .innerJoin(Habits, eq(Habits.id, Goals.habitId))
+    .where(eq(Goals.userId, userId))
+    .groupBy(Habits.isGoodHabit);
+
+  const goodHabitRate = completionRates.find(r => r.isGoodHabit)?.completedAttempts || 0;
+  const badHabitRate = completionRates.find(r => !r.isGoodHabit)?.completedAttempts || 0;
+
+  return {
+    goodHabits,
+    badHabits,
+    goodHabitCompletionRate: (goodHabitRate / (goodHabits || 1)) * 100,
+    badHabitCompletionRate: (badHabitRate / (badHabits || 1)) * 100,
+  };
+}
+
+// Update the return type
+type CategoryDistribution = {
+  categoryName: string;
+  habitCount: number;
+};
+
+export async function getCategoryDistribution(userId: string): Promise<CategoryDistribution[]> {
+  const categories = await getUserCategories(userId);
+  
+  const distribution = await Promise.all(categories.map(async (category) => {
+    const habitCount = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(Habits)
+      .where(and(
+        eq(Habits.categoryId, category.id),
+        eq(Habits.userId, userId)
+      ));
+
+    return {
+      categoryName: category.name,
+      habitCount: Number(habitCount[0].count) 
+    };
+  }));
+
+  return distribution.filter(item => item.habitCount > 0);
+}
+
 /*
 
 1. CRUD dla każdego z elementów czyli: Habits, Goals, Categories, Users 
@@ -480,6 +651,16 @@ export async function getHabitAdherenceLastTwoWeeks(userId: string) {
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
+
+
+
+
+
+
+
+
+
 
 
 
