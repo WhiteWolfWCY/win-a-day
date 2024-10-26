@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.0.0",
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@hookform/resolvers": "^3.9.0",
     "@neondatabase/serverless": "^0.10.1",
     "@radix-ui/react-avatar": "^1.1.1",

@@ -215,7 +215,7 @@ export default function AddHabitDialog({
                       ) : categories && categories.length > 0 ? (
                         categories.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
-                            {category.name}
+                            {category.icon} {category.name}
                           </SelectItem>
                         ))
                       ) : (

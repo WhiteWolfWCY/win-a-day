@@ -71,6 +71,7 @@ export async function getRecentHabitsForUser(userId: string) {
     habitName: Habits.name,
     habitCategory: Categories.name,
     habitCategoryId: Categories.id, 
+    habitCategoryIcon: Categories.icon,
     habitType: Habits.isGoodHabit,
   }).from(Habits)
     .innerJoin(Categories, eq(Habits.categoryId, Categories.id))
@@ -187,6 +188,7 @@ export async function getUserCategories(userId: string) {
     .select({
       id: Categories.id,
       name: Categories.name,
+      icon: Categories.icon,
     })
     .from(Categories)
     .where(eq(Categories.userId, userId));
@@ -195,6 +197,7 @@ export async function getUserCategories(userId: string) {
 
 //update a category
 export async function updateCategory(categoryId: string, categoryData: Partial<NewCategory>) {
+  console.log(categoryData.icon);
   const [updatedCategory] = await db.update(Categories).set(categoryData).where(eq(Categories.id, categoryId)).returning();
   return updatedCategory;
 }
