@@ -121,7 +121,27 @@ export async function createGoal(goalData: NewGoal) {
 
 //get all user goals
 export async function getAllUserGoals(userId: string) {
-  const goals = await db.select().from(Goals).where(eq(Goals.userId, userId));
+  const goals = await db.select({
+    id: Goals.id,
+    name: Goals.name,
+    habitId: Goals.habitId,
+    habitName: Habits.name,
+    priority: Goals.priority,
+    startDate: Goals.startDate,
+    finishDate: Goals.finishDate,
+    goalSuccess: Goals.goalSuccess,
+    weekDays: Goals.weekDays,
+    completedAttempts: sql<number>`(
+      SELECT CAST(COUNT(*) AS INTEGER)
+      FROM ${GoalsAttempts}
+      WHERE ${GoalsAttempts.goalId} = ${Goals.id}
+      AND ${GoalsAttempts.isCompleted} = true
+    )`.as('completedAttempts'),
+  }).from(Goals)
+    .innerJoin(Habits, eq(Goals.habitId, Habits.id))
+    .where(eq(Goals.userId, userId))
+    .orderBy(desc(Goals.createdAt));
+  
   return goals;
 }
 
@@ -377,6 +397,7 @@ export async function getUserGoalsForDay(date: string, userId: string) {
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
 
 
 
