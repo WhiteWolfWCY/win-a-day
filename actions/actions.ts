@@ -2,9 +2,8 @@
 
 import { db } from "@/db/drizzle";
 import { GoalsAttempts, Goals, Habits, Categories, Users } from "@/db/schema";
-import { eq, inArray, desc, and } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
-import { sql } from "drizzle-orm";
 
 
 type NewHabit = InferInsertModel<typeof Habits>;
