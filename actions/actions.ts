@@ -2,9 +2,9 @@
 
 import { db } from "@/db/drizzle";
 import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays } from "@/db/schema";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gte, lte } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
-import { parseISO } from 'date-fns';
+import { parseISO, subDays, startOfDay, endOfDay } from 'date-fns';
 
 
 type NewHabit = Omit<InferInsertModel<typeof Habits>, 'id'>;
@@ -466,7 +466,7 @@ export async function getHabitAdherenceLastTwoWeeks(userId: string) {
     }));
 }
 
-export async function getHabitStreaks(userId: string) {
+export async function getHabitStreaks(userId: string, startDate: Date, endDate: Date) {
   const habits = await getAllHabitsForUser(userId);
   const streaks = await Promise.all(habits.map(async (habit) => {
     const attempts = await db
@@ -476,7 +476,14 @@ export async function getHabitStreaks(userId: string) {
       })
       .from(GoalsAttempts)
       .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
-      .where(and(eq(Goals.habitId, habit.id), eq(GoalsAttempts.isCompleted, true)))
+      .where(
+        and(
+          eq(Goals.habitId, habit.id),
+          eq(GoalsAttempts.isCompleted, true),
+          gte(GoalsAttempts.date, startDate.toISOString().split('T')[0]),
+          lte(GoalsAttempts.date, endDate.toISOString().split('T')[0])
+        )
+      )
       .orderBy(desc(GoalsAttempts.date));
 
     let currentStreak = 0;
@@ -556,34 +563,35 @@ export async function getCategoryPerformance(userId: string) {
 
 // Get goal completion rate over time
 export async function getGoalCompletionRateOverTime(userId: string) {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const endDate = endOfDay(new Date());
+  const startDate = startOfDay(subDays(endDate, 30));
 
   const completionRates = await db
     .select({
       date: GoalsAttempts.date,
-      totalAttempts: sql<number>`CAST(COUNT(*) AS INTEGER)`,
-      completedAttempts: sql<number>`CAST(SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END) AS INTEGER)`,
+      totalAttempts: sql<number>`COUNT(*)`,
+      completedAttempts: sql<number>`SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END)`,
     })
     .from(GoalsAttempts)
     .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
-    .where(and(
-      eq(Goals.userId, userId),
-      sql`${GoalsAttempts.date} >= ${thirtyDaysAgo.toISOString().split('T')[0]}`
-    ))
+    .where(
+      and(
+        eq(Goals.userId, userId),
+        gte(GoalsAttempts.date, startDate.toISOString().split('T')[0]),
+        lte(GoalsAttempts.date, endDate.toISOString().split('T')[0])
+      )
+    )
     .groupBy(GoalsAttempts.date)
-    .orderBy(GoalsAttempts.date) as DailyCompletionRate[];
+    .orderBy(GoalsAttempts.date);
 
   return completionRates.map(rate => ({
     date: rate.date,
-    completionRate: rate.totalAttempts > 0
-      ? (rate.completedAttempts / rate.totalAttempts) * 100
-      : 0
+    completionRate: rate.totalAttempts > 0 ? (rate.completedAttempts / rate.totalAttempts) * 100 : 0,
   }));
 }
 
 // Get habit balance
-export async function getHabitBalance(userId: string) {
+export async function getHabitBalance(userId: string, startDate: Date, endDate: Date) {
   const habits = await getAllHabitsForUser(userId);
   const goodHabits = habits.filter(h => h.isGoodHabit).length;
   const badHabits = habits.length - goodHabits;
@@ -591,28 +599,42 @@ export async function getHabitBalance(userId: string) {
   const completionRates = await db
     .select({
       isGoodHabit: Habits.isGoodHabit,
-      totalAttempts: sql<number>`CAST(COUNT(DISTINCT ${Goals.id}) AS INTEGER)`,
+      totalAttempts: sql<number>`CAST(COUNT(*) AS INTEGER)`,
       completedAttempts: sql<number>`CAST(SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END) AS INTEGER)`,
     })
     .from(GoalsAttempts)
     .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
     .innerJoin(Habits, eq(Habits.id, Goals.habitId))
-    .where(eq(Goals.userId, userId))
+    .where(
+      and(
+        eq(Goals.userId, userId),
+        gte(GoalsAttempts.date, startDate.toISOString().split('T')[0]),
+        lte(GoalsAttempts.date, endDate.toISOString().split('T')[0])
+      )
+    )
     .groupBy(Habits.isGoodHabit);
 
-  const goodHabitRate = completionRates.find(r => r.isGoodHabit)?.completedAttempts || 0;
-  const badHabitRate = completionRates.find(r => !r.isGoodHabit)?.completedAttempts || 0;
+  const goodHabitStats = completionRates.find(r => r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
+  const badHabitStats = completionRates.find(r => !r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
+
+  const goodHabitCompletionRate = goodHabitStats.totalAttempts > 0
+    ? (goodHabitStats.completedAttempts / goodHabitStats.totalAttempts) * 100
+    : 0;
+
+  const badHabitCompletionRate = badHabitStats.totalAttempts > 0
+    ? (badHabitStats.completedAttempts / badHabitStats.totalAttempts) * 100
+    : 0;
 
   return {
     goodHabits,
     badHabits,
-    goodHabitCompletionRate: (goodHabitRate / (goodHabits || 1)) * 100,
-    badHabitCompletionRate: (badHabitRate / (badHabits || 1)) * 100,
+    goodHabitCompletionRate,
+    badHabitCompletionRate,
   };
 }
 
 // Update the return type
-type CategoryDistribution = {
+export type CategoryDistribution = {
   categoryName: string;
   habitCount: number;
 };
@@ -651,6 +673,10 @@ export async function getCategoryDistribution(userId: string): Promise<CategoryD
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
+
+
+
 
 
 
