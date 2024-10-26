@@ -11,11 +11,11 @@ export default function DashboardLayout({
 }>) {
   return (
     <>
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col relative overflow-hidden z-0">
       {[...Array(20)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full bg-yellow-200 opacity-20"
+          className="absolute rounded-full bg-yellow-200 opacity-20 z-0"
           style={{
             width: Math.random() * 100 + 50,
             height: Math.random() * 100 + 50,
@@ -34,8 +34,10 @@ export default function DashboardLayout({
           }}
         />
       ))}
-      <Navbar />
-      <MaxWidthWrapper className="pt-8">{children}</MaxWidthWrapper>
+      <div className="z-20 relative">
+        <Navbar />
+      </div>
+      <MaxWidthWrapper className="pt-8 z-10 relative">{children}</MaxWidthWrapper>
     </div>
     </>
   );
