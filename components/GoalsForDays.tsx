@@ -27,6 +27,9 @@ export default function GoalsForDays() {
       updateGoalAttempt(goalAttemptId, { isCompleted }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goalAttempts', format(selectedDate, 'yyyy-MM-dd')] });
+      queryClient.invalidateQueries({ queryKey: ['recent-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['goal-completion', userId] });
+      queryClient.invalidateQueries({ queryKey: ['habit-adherence', userId] });
     },
   });
 

@@ -75,6 +75,9 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recent-goals"] });
       queryClient.invalidateQueries({ queryKey: ["user-goals"] });
+      queryClient.invalidateQueries({ queryKey: ['goal-completion', userId] });
+      queryClient.invalidateQueries({ queryKey: ['habit-adherence', userId] });
+      queryClient.invalidateQueries({ queryKey: ['goalAttempts', format(new Date(), 'yyyy-MM-dd')] });
       setIsDialogOpen(false);
       toast({
         title: "Goal created",
