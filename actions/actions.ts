@@ -2,7 +2,7 @@
 
 import { db } from "@/db/drizzle";
 import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 
 
@@ -307,11 +307,17 @@ export async function getRecentGoalsForUser(userId: string) {
     finishDate: Goals.finishDate,
     goalSuccess: Goals.goalSuccess,
     weekDays: Goals.weekDays,
+    completedAttempts: sql<number>`(
+      SELECT CAST(COUNT(*) AS INTEGER)
+      FROM ${GoalsAttempts}
+      WHERE ${GoalsAttempts.goalId} = ${Goals.id}
+      AND ${GoalsAttempts.isCompleted} = true
+    )`.as('completedAttempts'),
   }).from(Goals)
     .innerJoin(Habits, eq(Goals.habitId, Habits.id))
     .where(eq(Goals.userId, userId))
     .orderBy(desc(Goals.createdAt))
-    .limit(4);
+    .limit(3);
   
   return goals;
 }

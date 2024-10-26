@@ -29,11 +29,11 @@ export default function NewestHabits() {
           </Button>
         </Link>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col h-full justify-between">
         {isLoading ? (
           <Loader />
         ) : habits && habits.length > 0 ? (
-          <>
+          <div className="flex flex-col h-full justify-between pb-16">
           {habits?.map((habit, index) => (
               <div
                 key={index}
@@ -60,7 +60,7 @@ export default function NewestHabits() {
                 isDialogOpen={isDialogOpen}
                 setIsDialogOpen={setIsDialogOpen}
               />
-            </>
+          </div>
         ) : (
           <>
             <p className="text-sm text-gray-500">No habits found</p>
