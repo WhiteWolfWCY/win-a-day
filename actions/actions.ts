@@ -60,7 +60,16 @@ export async function createHabit(habitData: NewHabit) {
 
 //get all habits
 export async function getAllHabitsForUser(userId: string) {
-  const habits = await db.select().from(Habits).where(eq(Habits.userId, userId));
+  const habits = await db.select({
+    id: Habits.id,
+    name: Habits.name,
+    isGoodHabit: Habits.isGoodHabit,
+    categoryId: Categories.id,
+    habitCategory: Categories.name,
+    habitCategoryIcon: Categories.icon,
+  }).from(Habits)
+    .innerJoin(Categories, eq(Habits.categoryId, Categories.id))
+    .where(eq(Habits.userId, userId));
   return habits;
 }
 
@@ -368,6 +377,7 @@ export async function getUserGoalsForDay(date: string, userId: string) {
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
 
 
 
