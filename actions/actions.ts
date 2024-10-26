@@ -6,10 +6,10 @@ import { eq, and } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 
 
-type NewHabit = InferInsertModel<typeof Habits>;
-type NewGoal = InferInsertModel<typeof Goals>;
-type NewCategory = InferInsertModel<typeof Categories>;
-type NewGoalAttempt = InferInsertModel<typeof GoalsAttempts>;
+type NewHabit = Omit<InferInsertModel<typeof Habits>, 'id'>;
+type NewGoal = Omit<InferInsertModel<typeof Goals>, 'id'>;
+type NewCategory = Omit<InferInsertModel<typeof Categories>, 'id'>;
+type NewGoalAttempt = Omit<InferInsertModel<typeof GoalsAttempts>, 'id'>;
 
 //USERS
 
@@ -71,13 +71,13 @@ export async function getUserHabits(userId: string) {
 }
 
 //update a habit
-export async function updateHabit(habitId: number, habitData: Partial<NewHabit>) {
+export async function updateHabit(habitId: string, habitData: Partial<NewHabit>) {
   const [updatedHabit] = await db.update(Habits).set(habitData).where(eq(Habits.id, habitId)).returning();
   return updatedHabit;
 }
 
 //delete a habit
-export async function deleteHabit(habitId: number) {
+export async function deleteHabit(habitId: string) {
   await db.delete(Habits).where(eq(Habits.id, habitId));
 }
 
@@ -105,18 +105,18 @@ export async function getAllUserGoals(userId: string) {
 }
 
 //update a goal
-export async function updateGoal(goalId: number, goalData: Partial<NewGoal>) {
+export async function updateGoal(goalId: string, goalData: Partial<NewGoal>) {
   const [updatedGoal] = await db.update(Goals).set(goalData).where(eq(Goals.id, goalId)).returning();
   return updatedGoal;
 }
 
 //delete a goal
-export async function deleteGoal(goalId: number) {
+export async function deleteGoal(goalId: string) {
   await db.delete(Goals).where(eq(Goals.id, goalId));
 }
 
 //goals for habit
-export async function getGoalsForHabit(habitId: number) {
+export async function getGoalsForHabit(habitId: string) {
   const goals = await db.select().from(Goals).where(eq(Goals.habitId, habitId));
   return goals;
 }
@@ -162,13 +162,13 @@ export async function getUserCategories(userId: string) {
 }
 
 //update a category
-export async function updateCategory(categoryId: number, categoryData: Partial<NewCategory>) {
+export async function updateCategory(categoryId: string, categoryData: Partial<NewCategory>) {
   const [updatedCategory] = await db.update(Categories).set(categoryData).where(eq(Categories.id, categoryId)).returning();
   return updatedCategory;
 }
 
 //delete a category
-export async function deleteCategory(categoryId: number) {
+export async function deleteCategory(categoryId: string) {
   await db.delete(Categories).where(eq(Categories.id, categoryId));
 }
 
@@ -176,7 +176,7 @@ export async function deleteCategory(categoryId: number) {
 
 //create a Goal Attempt
 
-export async function createGoalAttemptsForGoal(goalId: number) {
+export async function createGoalAttemptsForGoal(goalId: string) {
   // Retrieve the goal
   const [goal] = await db.select().from(Goals).where(eq(Goals.id, goalId));
   const { startDate, finishDate, weekDays } = goal;  
@@ -217,7 +217,6 @@ export async function createGoalAttemptsForGoal(goalId: number) {
     if (weekDayNumbers?.includes(dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6)) {
       // Create a GoalAttempt for this date
       goalAttemptsToInsert.push({
-        id: Date.now(), // Generate a unique ID
         goalId: goal.id,
         date: currentDate.toISOString(), // Convert Date to ISO string
         isCompleted: false,
@@ -235,7 +234,7 @@ export async function createGoalAttemptsForGoal(goalId: number) {
 }
 
 //update a goal attempt
-export async function updateGoalAttempt(goalAttemptId: number, goalAttemptData: Partial<NewGoalAttempt>) {
+export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: Partial<NewGoalAttempt>) {
   const [updatedGoalAttempt] = await db.update(GoalsAttempts).set(goalAttemptData).where(eq(GoalsAttempts.id, goalAttemptId)).returning();
   return updatedGoalAttempt;
 }
@@ -255,5 +254,6 @@ export async function updateGoalAttempt(goalAttemptId: number, goalAttemptData: 
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
 
 
