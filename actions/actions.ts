@@ -333,6 +333,25 @@ export async function updateGoalAttemptsForGoal(goalId: string) {
   await createGoalAttemptsForGoal(goalId);
 }
 
+// Get user goals for a specific day
+export async function getUserGoalsForDay(date: string, userId: string) {
+  const goalAttemptsForDay = await db
+    .select({
+      goalAttempt: GoalsAttempts,
+      goal: Goals,
+    })
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+    .where(
+      and(
+        eq(GoalsAttempts.date, date),
+        eq(Goals.userId, userId) // Replace with actual user ID retrieval method
+      )
+    );
+
+  return goalAttemptsForDay;
+}
+
 /*
 
 1. CRUD dla każdego z elementów czyli: Habits, Goals, Categories, Users 

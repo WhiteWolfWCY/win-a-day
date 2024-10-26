@@ -80,6 +80,16 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
         title: "Goal created",
         description: "Your goal has been successfully created.",
       });
+      // Reset the form
+      form.reset({
+        name: "",
+        habitId: "",
+        priority: GoalPriority.MEDIUM,
+        startDate: new Date().toISOString().split('T')[0],
+        finishDate: "",
+        goalSuccess: 1,
+        weekDays: [],
+      });
     },
     onError: (error) => {
       toast({
@@ -100,6 +110,16 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
       toast({
         title: "Goal updated",
         description: "Your goal has been successfully updated.",
+      });
+      // Reset the form
+      form.reset({
+        name: "",
+        habitId: "",
+        priority: GoalPriority.MEDIUM,
+        startDate: new Date().toISOString().split('T')[0],
+        finishDate: "",
+        goalSuccess: 1,
+        weekDays: [],
       });
     },
     onError: (error) => {
@@ -122,7 +142,23 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
   }
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog 
+      open={isDialogOpen} 
+      onOpenChange={(open) => {
+        if (!open) {
+          form.reset({
+            name: "",
+            habitId: "",
+            priority: GoalPriority.MEDIUM,
+            startDate: new Date().toISOString().split('T')[0],
+            finishDate: "",
+            goalSuccess: 1,
+            weekDays: [],
+          });
+        }
+        setIsDialogOpen(open);
+      }}
+    >
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{goalId ? "Edit Goal" : "Add New Goal"}</DialogTitle>

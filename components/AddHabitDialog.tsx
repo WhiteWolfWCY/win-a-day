@@ -106,6 +106,7 @@ export default function AddHabitDialog({
     mutationFn: createHabit,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
+      queryClient.invalidateQueries({ queryKey: ["user-habits"] });
       setIsDialogOpen(false);
       form.reset();
       toast({
@@ -132,6 +133,7 @@ export default function AddHabitDialog({
     }) => updateHabit(habitData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
+      queryClient.invalidateQueries({ queryKey: ["user-habits"] });
       setIsDialogOpen(false);
       toast({
         title: "Habit updated",
@@ -181,7 +183,7 @@ export default function AddHabitDialog({
           <DialogTitle>{habitId ? "Edit Habit" : "Add New Habit"}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="name"
