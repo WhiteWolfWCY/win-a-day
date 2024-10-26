@@ -48,6 +48,7 @@ const formSchema = z.object({
 interface AddHabitDialogProps {
   isDialogOpen: boolean;
   setIsDialogOpen: (isDialogOpen: boolean) => void;
+  showAddButton?: boolean;
   habitId?: string;
   initialValues?: {
     name: string;
@@ -61,6 +62,7 @@ export default function AddHabitDialog({
   setIsDialogOpen,
   habitId,
   initialValues,
+  showAddButton,
 }: AddHabitDialogProps) {
   const { userId } = useAuth();
   const queryClient = useQueryClient();
@@ -171,7 +173,7 @@ export default function AddHabitDialog({
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      {!habitId && (
+      {showAddButton && (
         <DialogTrigger asChild>
           <Button className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-white">
             <Plus className="mr-2 h-4 w-4" /> Add Habit

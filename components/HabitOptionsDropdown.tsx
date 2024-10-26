@@ -26,6 +26,7 @@ export default function HabitMenu({ habitId, habitName, categoryId, isGoodHabit 
     mutationFn: deleteHabit,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
+      queryClient.invalidateQueries({ queryKey: ["user-habits"] });
       toast({
         title: "Habit deleted",
         description: "The habit has been successfully deleted.",
