@@ -40,7 +40,7 @@ export default function Home() {
             <span className="font-bold text-2xl">Win a Day</span>
           </Link>
           <div className="flex items-center justify-center gap-4">
-            <Link href="/dashboard">
+            <Link href="/dashboard/home">
               <Button size="sm" className="flex items-center justify-center hover:bg-yellow-600">
                 Dive in
                 <ArrowRight className="h-10 w-10" />
@@ -86,7 +86,7 @@ export default function Home() {
                   size="lg"
                   className="bg-yellow-500 hover:bg-yellow-600 text-white"
                 >
-                  <Link href="/dashboard">
+                  <Link href="/dashboard/home">
                     Start Your Journey <ArrowRight className="h-8 w-8" />
                   </Link>
                 </Button>
