@@ -209,7 +209,8 @@ export async function getUserGoalsForToday(userId: string) {
         eq(Goals.userId, userId),
         eq(GoalsAttempts.date, todayStr)
       )
-    );
+    )
+    .execute();
 
   return goalAttemptsForToday;
 }
@@ -298,13 +299,15 @@ export async function createHabitWithCategory(habitData: {
     .select()
     .from(Categories)
     .where(and(eq(Categories.name, habitData.category), eq(Categories.userId, habitData.userId)))
-    .limit(1);
+    .limit(1)
+    .execute();
   
   if (!category) {
     [category] = await db.insert(Categories).values({
       name: habitData.category,
       userId: habitData.userId
-    }).returning();
+    }).returning()
+    .execute();
   }
 
   // Now create the habit
@@ -316,7 +319,8 @@ export async function createHabitWithCategory(habitData: {
       userId: habitData.userId,
       isGoodHabit: habitData.isGoodHabit,
     })
-    .returning();
+    .returning()
+    .execute();
   
   return newHabit;
 }
@@ -405,7 +409,8 @@ export async function getOverallGoalCompletion(userId: string) {
     })
     .from(GoalsAttempts)
     .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
-    .where(eq(Goals.userId, userId));
+    .where(eq(Goals.userId, userId))
+    .execute();
 
   const { totalAttempts, completedAttempts } = result[0];
   return {
@@ -551,8 +556,12 @@ export async function getCategoryPerformance(userId: string) {
         inArray(Goals.habitId, habitIds)
       ));
 
-    const rate = completionRate[0].totalGoals > 0
-      ? (completionRate[0].completedGoals / completionRate[0].totalGoals) * 100
+      if(!completionRate || completionRate.length === 0) {
+        return { categoryName: category.name, completionRate: 0 };
+      }
+
+    const rate = completionRate[0]?.totalGoals > 0
+      ? (completionRate[0]?.completedGoals / completionRate[0]?.totalGoals) * 100
       : 0;
 
     return { categoryName: category.name, completionRate: rate };
@@ -592,7 +601,13 @@ export async function getGoalCompletionRateOverTime(userId: string) {
 
 // Get habit balance
 export async function getHabitBalance(userId: string, startDate: Date, endDate: Date) {
-  const habits = await getAllHabitsForUser(userId);
+  let habits = await getAllHabitsForUser(userId);
+  
+  // Upewnij się, że habits jest tablicą
+  if (!Array.isArray(habits)) {
+    habits = [];  // Przypisz pustą tablicę, jeśli wynik nie jest tablicą
+  }
+
   const goodHabits = habits.filter(h => h.isGoodHabit).length;
   const badHabits = habits.length - goodHabits;
 
@@ -612,10 +627,20 @@ export async function getHabitBalance(userId: string, startDate: Date, endDate: 
         lte(GoalsAttempts.date, endDate.toISOString().split('T')[0])
       )
     )
-    .groupBy(Habits.isGoodHabit);
+    .groupBy(Habits.isGoodHabit)
+    .execute();
 
-  const goodHabitStats = completionRates.find(r => r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
-  const badHabitStats = completionRates.find(r => !r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
+    if(!completionRates || completionRates.length === 0) {
+      return {
+        goodHabits: 0,
+        badHabits: 0,
+        goodHabitCompletionRate: 0,
+        badHabitCompletionRate: 0,
+      };
+    }
+
+  const goodHabitStats = completionRates?.find(r => r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
+  const badHabitStats = completionRates?.find(r => !r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
 
   const goodHabitCompletionRate = goodHabitStats.totalAttempts > 0
     ? (goodHabitStats.completedAttempts / goodHabitStats.totalAttempts) * 100
@@ -632,6 +657,7 @@ export async function getHabitBalance(userId: string, startDate: Date, endDate: 
     badHabitCompletionRate,
   };
 }
+
 
 // Update the return type
 export type CategoryDistribution = {
@@ -653,7 +679,7 @@ export async function getCategoryDistribution(userId: string): Promise<CategoryD
 
     return {
       categoryName: category.name,
-      habitCount: Number(habitCount[0].count) 
+      habitCount: Number(habitCount[0]?.count) 
     };
   }));
 
