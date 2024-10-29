@@ -571,15 +571,12 @@ export async function getCategoryPerformance(userId: string) {
 }
 
 // Get goal completion rate over time
-export async function getGoalCompletionRateOverTime(userId: string) {
-  const endDate = endOfDay(new Date());
-  const startDate = startOfDay(subDays(endDate, 30));
-
+export async function getGoalCompletionRateOverTime(userId: string, startDate: Date, endDate: Date) {
   const completionRates = await db
     .select({
       date: GoalsAttempts.date,
-      totalAttempts: sql<number>`COUNT(*)`,
-      completedAttempts: sql<number>`SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END)`,
+      totalAttempts: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+      completedAttempts: sql<number>`CAST(SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END) AS INTEGER)`,
     })
     .from(GoalsAttempts)
     .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
@@ -595,7 +592,9 @@ export async function getGoalCompletionRateOverTime(userId: string) {
 
   return completionRates.map(rate => ({
     date: rate.date,
-    completionRate: rate.totalAttempts > 0 ? (rate.completedAttempts / rate.totalAttempts) * 100 : 0,
+    completionRate: rate.totalAttempts > 0 
+      ? (Number(rate.completedAttempts) / Number(rate.totalAttempts)) * 100 
+      : 0,
   }));
 }
 
