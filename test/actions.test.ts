@@ -557,25 +557,46 @@ describe('Actions', () => {
   describe('getGoalCompletionRateOverTime', () => {
     it('should return goal completion rate over time', async () => {
       const userId = 'user-123';
+      const startDate = new Date('2023-01-01');
+      const endDate = new Date('2023-12-31');
+      
       const completionRates = [
         { date: '2023-01-10', totalAttempts: 5, completedAttempts: 4 },
         { date: '2023-01-11', totalAttempts: 3, completedAttempts: 2 },
       ];
 
-      mockDb.select.mockReturnValueOnce({
+      const mockChain = {
         from: jest.fn().mockReturnThis(),
         innerJoin: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         groupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockResolvedValueOnce(completionRates),
-      } as any);
+      };
+
+      mockDb.select.mockReturnValueOnce(mockChain as any);
 
       // Act
-      const result = await getGoalCompletionRateOverTime(userId);
+      const result = await getGoalCompletionRateOverTime(userId, startDate, endDate);
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.length).toBeGreaterThan(0);
+      expect(result.length).toBe(2);
+      
+      // Check first result
+      expect(result[0].date).toBe('2023-01-10');
+      expect(result[0].completionRate).toBe(80);
+      
+      // Check second result
+      expect(result[1].date).toBe('2023-01-11');
+      expect(Math.round(result[1].completionRate * 100) / 100).toBe(66.67);
+      
+      // Verify the query chain was called correctly
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockChain.from).toHaveBeenCalled();
+      expect(mockChain.innerJoin).toHaveBeenCalled();
+      expect(mockChain.where).toHaveBeenCalled();
+      expect(mockChain.groupBy).toHaveBeenCalled();
+      expect(mockChain.orderBy).toHaveBeenCalled();
     });
   });
 
