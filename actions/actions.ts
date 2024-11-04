@@ -1,10 +1,12 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays } from "@/db/schema";
+import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays, Achievements, UserAchievements, AchievementCategory } from "@/db/schema";
 import { eq, and, desc, sql, inArray, gte, lte } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 import { parseISO, subDays, startOfDay, endOfDay } from 'date-fns';
+import { getCurrentStreak, updateAchievementProgress } from "./achievements";
+import { updateUserStats } from "./stats";
 
 
 type NewHabit = Omit<InferInsertModel<typeof Habits>, 'id'>;
@@ -67,21 +69,27 @@ export async function createHabit(habitData: NewHabit) {
     .insert(Habits)
     .values(habitData)
     .returning();
+
+  await checkAndUpdateAchievements(habitData.userId!);
+  await updateUserStats(habitData.userId!);
   return newHabit;
 }
 
 //get all habits
 export async function getAllHabitsForUser(userId: string) {
-  const habits = await db.select({
-    id: Habits.id,
-    name: Habits.name,
-    isGoodHabit: Habits.isGoodHabit,
-    categoryId: Categories.id,
-    habitCategory: Categories.name,
-    habitCategoryIcon: Categories.icon,
-  }).from(Habits)
+  const habits = await db
+    .select({
+      id: Habits.id,
+      name: Habits.name,
+      isGoodHabit: Habits.isGoodHabit,
+      categoryId: Categories.id,
+      habitCategory: Categories.name,
+      habitCategoryIcon: Categories.icon,
+    })
+    .from(Habits)
     .innerJoin(Categories, eq(Habits.categoryId, Categories.id))
     .where(eq(Habits.userId, userId));
+  
   return habits;
 }
 
@@ -127,6 +135,8 @@ export async function getLastThreeHabits(userId: string) {
 export async function createGoal(goalData: NewGoal) {
   const [newGoal] = await db.insert(Goals).values(goalData).returning();
   await createGoalAttemptsForGoal(newGoal.id);
+  await checkAndUpdateAchievements(goalData.userId!);
+  await updateUserStats(goalData.userId!);
   return newGoal;
 }
 
@@ -139,6 +149,7 @@ export async function getAllUserGoals(userId: string) {
     habitId: Goals.habitId,
     habitName: Habits.name,
     priority: Goals.priority,
+    isCompleted: Goals.isCompleted,
     startDate: Goals.startDate,
     finishDate: Goals.finishDate,
     goalSuccess: Goals.goalSuccess,
@@ -174,6 +185,17 @@ export async function updateGoal(goalData: {
     .where(eq(Goals.id, goalData.id))
     .returning();
   await updateGoalAttemptsForGoal(updatedGoal.id);
+  
+  // Get the user ID for this goal
+  const [goal] = await db
+    .select({ userId: Goals.userId })
+    .from(Goals)
+    .where(eq(Goals.id, goalData.id));
+    
+  if (goal) {
+    await checkAndUpdateAchievements(goal.userId!);
+  }
+  
   return updatedGoal;
 }
 
@@ -284,7 +306,41 @@ export async function createGoalAttemptsForGoal(goalId: string) {
 
 //update a goal attempt
 export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: Partial<NewGoalAttempt>) {
-  const [updatedGoalAttempt] = await db.update(GoalsAttempts).set(goalAttemptData).where(eq(GoalsAttempts.id, goalAttemptId)).returning();
+  const [updatedGoalAttempt] = await db
+    .update(GoalsAttempts)
+    .set(goalAttemptData)
+    .where(eq(GoalsAttempts.id, goalAttemptId))
+    .returning();
+
+  if (goalAttemptData.isCompleted) {
+    // Get the goal and check if we've reached the required number of successes
+    const [goalAttempt] = await db
+      .select({
+        goal: Goals,
+        userId: Goals.userId,
+        completedAttempts: sql<number>`(
+          SELECT COUNT(*)
+          FROM ${GoalsAttempts}
+          WHERE ${GoalsAttempts.goalId} = ${Goals.id}
+          AND ${GoalsAttempts.isCompleted} = true
+        )`
+      })
+      .from(GoalsAttempts)
+      .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+      .where(eq(GoalsAttempts.id, goalAttemptId));
+
+    if (goalAttempt && goalAttempt.completedAttempts >= goalAttempt.goal.goalSuccess) {
+      // Update the goal to be completed
+      await db
+        .update(Goals)
+        .set({ isCompleted: true })
+        .where(eq(Goals.id, goalAttempt.goal.id));
+
+      await checkAndUpdateAchievements(goalAttempt.userId!);
+      await updateUserStats(goalAttempt.userId!);
+    }
+  }
+
   return updatedGoalAttempt;
 }
 
@@ -340,6 +396,16 @@ export async function updateHabit(habitData: {
     })
     .where(eq(Habits.id, habitData.id))
     .returning();
+
+  // Get userId for the habit
+  const [habit] = await db
+    .select({ userId: Habits.userId })
+    .from(Habits)
+    .where(eq(Habits.id, habitData.id));
+
+  if (habit) {
+    await updateUserStats(habit.userId!);
+  }
   return updatedHabit;
 }
 
@@ -351,6 +417,7 @@ export async function getRecentGoalsForUser(userId: string) {
     habitId: Goals.habitId,
     habitName: Habits.name,
     priority: Goals.priority,
+    isCompleted: Goals.isCompleted,
     startDate: Goals.startDate,
     finishDate: Goals.finishDate,
     goalSuccess: Goals.goalSuccess,
@@ -698,6 +765,53 @@ export async function getCategoryDistribution(userId: string): Promise<CategoryD
 5. Goals dla DZISIEJSZEJ DATY
 
 */
+
+async function checkAndUpdateAchievements(userId: string) {
+  // Check habit-related achievements
+  const habitCount = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(Habits)
+    .where(eq(Habits.userId, userId));
+
+  const habitAchievements = await db
+    .select()
+    .from(Achievements)
+    .where(eq(Achievements.category, AchievementCategory.HABITS));
+
+  for (const achievement of habitAchievements) {
+    await updateAchievementProgress(userId, achievement.id, Number(habitCount[0].count));
+  }
+
+  // Check goal-related achievements
+  const completedGoalsCount = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(Goals)
+    .where(and(
+      eq(Goals.userId, userId),
+      eq(Goals.isCompleted, true)
+    ));
+
+  const goalAchievements = await db
+    .select()
+    .from(Achievements)
+    .where(eq(Achievements.category, AchievementCategory.GOALS));
+
+  for (const achievement of goalAchievements) {
+    await updateAchievementProgress(userId, achievement.id, Number(completedGoalsCount[0].count));
+  }
+
+  // Check streak achievements
+  const currentStreak = await getCurrentStreak(userId);
+  
+  const streakAchievements = await db
+    .select()
+    .from(Achievements)
+    .where(eq(Achievements.category, AchievementCategory.STREAKS));
+
+  for (const achievement of streakAchievements) {
+    await updateAchievementProgress(userId, achievement.id, currentStreak);
+  }
+}
 
 
 

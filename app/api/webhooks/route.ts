@@ -56,6 +56,7 @@ export async function POST(req: Request) {
         id: evt.data.id,
         email: evt.data.email_addresses[0].email_address,
         name: evt.data.first_name + ' ' + evt.data.last_name,
+        imgUrl: evt.data.image_url,
         joinDate: new Date().toISOString(),
     }
     await createUser(userData)

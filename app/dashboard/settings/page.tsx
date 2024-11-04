@@ -9,6 +9,8 @@ import { format } from "date-fns";
 import Loader from "@/components/Loader";
 import ManageCategories from "@/components/ManageCategories";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import AchievementBadges from "@/components/AchievementBadges";
+import AchievementsDialog from "@/components/AchievementsDialog";
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
@@ -46,7 +48,18 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
-      <Card className="bg-card backdrop-blur-sm mt-6">
+
+      <Card className="bg-card backdrop-blur-sm">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-2xl font-bold">Achievements</CardTitle>
+          <AchievementsDialog />
+        </CardHeader>
+        <CardContent>
+          <AchievementBadges />
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">Appearance</CardTitle>
         </CardHeader>
@@ -62,6 +75,7 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
       <ManageCategories />
     </main>
   );

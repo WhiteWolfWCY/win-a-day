@@ -101,12 +101,16 @@ export default function GoalsPage() {
                     <TableHead>Finish Date</TableHead>
                     <TableHead>Days</TableHead>
                     <TableHead>Progress</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedGoals.map((goal) => (
-                    <TableRow key={goal.id}>
+                    <TableRow 
+                      key={goal.id}
+                      className={goal.isCompleted ? "bg-green-50/50 dark:bg-green-950/20" : ""}
+                    >
                       <TableCell>{goal.name}</TableCell>
                       <TableCell>
                         <span className={`font-semibold ${getPriorityColor(goal.priority)}`}>
@@ -116,6 +120,17 @@ export default function GoalsPage() {
                       <TableCell>{format(new Date(goal.finishDate), 'yyyy-MM-dd')}</TableCell>
                       <TableCell>{getWeekDaysString(goal.weekDays!)}</TableCell>
                       <TableCell>{goal.completedAttempts || 0}/{goal.goalSuccess} successes</TableCell>
+                      <TableCell>
+                        {goal.isCompleted ? (
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                            Completed
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                            In Progress
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <GoalMenu
                           goalId={goal.id}
