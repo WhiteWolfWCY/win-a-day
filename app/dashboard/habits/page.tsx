@@ -46,7 +46,7 @@ export default function HabitsPage() {
 
   return (
     <main className="container mx-auto flex-grow flex flex-col gap-6 p-6 z-10">
-      <Card className="bg-white bg-opacity-80 backdrop-blur-sm">
+      <Card className="bg-opacity-80 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">All Habits</CardTitle>
           <Button onClick={() => setIsDialogOpen(true)}>

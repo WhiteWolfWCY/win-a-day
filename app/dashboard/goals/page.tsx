@@ -74,7 +74,7 @@ export default function GoalsPage() {
 
   return (
     <main className="container mx-auto flex-grow flex flex-col gap-6 p-6 z-10">
-      <Card className="bg-white bg-opacity-80 backdrop-blur-sm">
+      <Card className="bg-card/80 backdrop-blur-sm border">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-2xl font-bold">All Goals</CardTitle>
           <Button onClick={() => setIsDialogOpen(true)}>
