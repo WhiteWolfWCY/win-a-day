@@ -5,7 +5,7 @@ import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays
 import { eq, and, desc, sql, inArray, gte, lte } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 import { parseISO, subDays, startOfDay, endOfDay } from 'date-fns';
-import { getCurrentStreak, updateAchievementProgress } from "./achievements";
+import { checkAndUpdateAchievements, getCurrentStreak, updateAchievementProgress } from "./achievements";
 import { updateUserStats } from "./stats";
 
 
@@ -312,32 +312,34 @@ export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: 
     .where(eq(GoalsAttempts.id, goalAttemptId))
     .returning();
 
-  if (goalAttemptData.isCompleted) {
-    // Get the goal and check if we've reached the required number of successes
-    const [goalAttempt] = await db
-      .select({
-        goal: Goals,
-        userId: Goals.userId,
-        completedAttempts: sql<number>`(
-          SELECT COUNT(*)
-          FROM ${GoalsAttempts}
-          WHERE ${GoalsAttempts.goalId} = ${Goals.id}
-          AND ${GoalsAttempts.isCompleted} = true
-        )`
-      })
-      .from(GoalsAttempts)
-      .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
-      .where(eq(GoalsAttempts.id, goalAttemptId));
+  // Get the goal's userId for updating achievements and stats
+  const [goalAttempt] = await db
+    .select({
+      goal: Goals,
+      userId: Goals.userId,
+      completedAttempts: sql<number>`(
+        SELECT COUNT(*)
+        FROM ${GoalsAttempts}
+        WHERE ${GoalsAttempts.goalId} = ${Goals.id}
+        AND ${GoalsAttempts.isCompleted} = true
+      )`
+    })
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+    .where(eq(GoalsAttempts.id, goalAttemptId));
 
-    if (goalAttempt && goalAttempt.completedAttempts >= goalAttempt.goal.goalSuccess) {
-      // Update the goal to be completed
+  if (goalAttempt) {
+    // Always update achievements and stats when a goal attempt is updated
+    await checkAndUpdateAchievements(goalAttempt.userId!);
+    await updateUserStats(goalAttempt.userId!);
+
+    // Check if the goal should be marked as completed
+    if (goalAttemptData.isCompleted && 
+        goalAttempt.completedAttempts >= goalAttempt.goal.goalSuccess) {
       await db
         .update(Goals)
         .set({ isCompleted: true })
         .where(eq(Goals.id, goalAttempt.goal.id));
-
-      await checkAndUpdateAchievements(goalAttempt.userId!);
-      await updateUserStats(goalAttempt.userId!);
     }
   }
 
@@ -766,52 +768,6 @@ export async function getCategoryDistribution(userId: string): Promise<CategoryD
 
 */
 
-async function checkAndUpdateAchievements(userId: string) {
-  // Check habit-related achievements
-  const habitCount = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(Habits)
-    .where(eq(Habits.userId, userId));
-
-  const habitAchievements = await db
-    .select()
-    .from(Achievements)
-    .where(eq(Achievements.category, AchievementCategory.HABITS));
-
-  for (const achievement of habitAchievements) {
-    await updateAchievementProgress(userId, achievement.id, Number(habitCount[0].count));
-  }
-
-  // Check goal-related achievements
-  const completedGoalsCount = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(Goals)
-    .where(and(
-      eq(Goals.userId, userId),
-      eq(Goals.isCompleted, true)
-    ));
-
-  const goalAchievements = await db
-    .select()
-    .from(Achievements)
-    .where(eq(Achievements.category, AchievementCategory.GOALS));
-
-  for (const achievement of goalAchievements) {
-    await updateAchievementProgress(userId, achievement.id, Number(completedGoalsCount[0].count));
-  }
-
-  // Check streak achievements
-  const currentStreak = await getCurrentStreak(userId);
-  
-  const streakAchievements = await db
-    .select()
-    .from(Achievements)
-    .where(eq(Achievements.category, AchievementCategory.STREAKS));
-
-  for (const achievement of streakAchievements) {
-    await updateAchievementProgress(userId, achievement.id, currentStreak);
-  }
-}
 
 
 

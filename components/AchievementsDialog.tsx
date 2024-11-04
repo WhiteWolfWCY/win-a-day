@@ -21,11 +21,11 @@ export default function AchievementsDialog() {
     enabled: !!userId,
   });
 
-  const achievementsByCategory = achievements?.reduce((acc, { achievement, progress, unlockedAt }) => {
+  const achievementsByCategory = achievements?.reduce((acc, achievement) => {
     if (!acc[achievement.category]) {
       acc[achievement.category] = [];
     }
-    acc[achievement.category].push({ achievement, progress, unlockedAt });
+    acc[achievement.category].push(achievement);
     return acc;
   }, {} as Record<AchievementCategory, any[]>);
 
@@ -57,12 +57,12 @@ export default function AchievementsDialog() {
             {Object.values(AchievementCategory).map((category) => (
               <TabsContent key={category} value={category}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {achievementsByCategory?.[category]?.map(({ achievement, progress = 0, unlockedAt }) => (
+                  {achievementsByCategory?.[category]?.map((achievement) => (
                     <Card
                       key={achievement.id}
                       className={cn(
                         "transition-colors",
-                        unlockedAt 
+                        achievement.unlockedAt 
                           ? "bg-primary/5 dark:bg-primary/10" 
                           : "bg-muted/50 dark:bg-muted/20"
                       )}
@@ -80,18 +80,24 @@ export default function AchievementsDialog() {
                           </div>
                         </div>
                         <div className="mt-4 space-y-2">
-                          <Progress
-                            value={(progress / achievement.requirement) * 100}
-                            className="h-2"
-                          />
-                          <div className="flex justify-between text-sm text-muted-foreground">
-                            <span>Progress: {progress}/{achievement.requirement}</span>
-                            {unlockedAt && (
-                              <span className="text-primary">
-                                Unlocked {new Date(unlockedAt).toLocaleDateString()}
+                          {achievement.unlockedAt ? (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-primary font-medium">Achievement Completed!</span>
+                              <span className="text-muted-foreground">
+                                {achievement.unlockedAt.toLocaleDateString()}
                               </span>
-                            )}
-                          </div>
+                            </div>
+                          ) : (
+                            <>
+                              <Progress
+                                value={(achievement.progress / achievement.requirement) * 100}
+                                className="h-2"
+                              />
+                              <div className="flex justify-between text-sm text-muted-foreground">
+                                <span>Progress: {achievement.progress}/{achievement.requirement}</span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

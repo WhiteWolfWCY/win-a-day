@@ -11,22 +11,32 @@ export async function getAchievements() {
 }
 
 export async function getUserAchievements(userId: string) {
-  const userAchievements = await db
+  const achievements = await db
     .select({
-      achievement: Achievements,
+      id: Achievements.id,
+      name: Achievements.name,
+      description: Achievements.description,
+      category: Achievements.category,
+      requirement: Achievements.requirement,
+      icon: Achievements.icon,
       progress: UserAchievements.progress,
-      unlockedAt: UserAchievements.unlockedAt
+      xpReward: Achievements.xpReward,
+      unlockedAt: UserAchievements.unlockedAt,
     })
     .from(Achievements)
     .leftJoin(
       UserAchievements,
       and(
-        eq(UserAchievements.achievementId, Achievements.id),
+        eq(Achievements.id, UserAchievements.achievementId),
         eq(UserAchievements.userId, userId)
       )
     );
 
-  return userAchievements;
+  return achievements.map(achievement => ({
+    ...achievement,
+    progress: achievement.progress ?? 0,
+    unlockedAt: achievement.unlockedAt ? new Date(achievement.unlockedAt) : null,
+  }));
 }
 
 export async function updateAchievementProgress(
@@ -76,41 +86,66 @@ export async function updateAchievementProgress(
 
 export async function getCurrentStreak(userId: string) {
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
   const thirtyDaysAgo = new Date(today);
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const attempts = await db
+  // Get days with completed goal attempts
+  const dailyAttempts = await db
     .select({
-      date: UserAchievements.unlockedAt,
+      date: GoalsAttempts.date,
     })
-    .from(UserAchievements)
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
     .where(
       and(
-        eq(UserAchievements.userId, userId),
-        sql`${UserAchievements.unlockedAt} >= ${thirtyDaysAgo.toISOString()}`,
-        sql`${UserAchievements.unlockedAt} IS NOT NULL`
+        eq(Goals.userId, userId),
+        eq(GoalsAttempts.isCompleted, true),
+        sql`${GoalsAttempts.date} >= ${thirtyDaysAgo.toISOString()}`
       )
     )
-    .orderBy(sql`${UserAchievements.unlockedAt} DESC`);
+    .groupBy(GoalsAttempts.date)
+    .orderBy(sql`${GoalsAttempts.date} DESC`);
 
-  let currentStreak = 0;
-  let lastDate = today;
+ 
+  if (dailyAttempts.length === 0) return 0;
 
-  for (const attempt of attempts) {
-    if (!attempt.date) continue;
+  let streak = 1;
+  let previousDate = new Date(dailyAttempts[0].date);
+  previousDate.setHours(0, 0, 0, 0);
+
+ 
+
+  // Loop through dates from most recent to oldest
+  for (let i = 1; i < dailyAttempts.length; i++) {
+    const currentDate = new Date(dailyAttempts[i].date);
+    currentDate.setHours(0, 0, 0, 0);
     
-    const attemptDate = new Date(attempt.date);
-    const dayDiff = Math.floor((lastDate.getTime() - attemptDate.getTime()) / (1000 * 3600 * 24));
     
-    if (dayDiff <= 1) {
-      currentStreak++;
+    // Calculate days between dates
+    const diffInDays = Math.floor(
+      (previousDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    
+
+    if (diffInDays === 1) {
+      streak++;
+      previousDate = currentDate;
     } else {
       break;
     }
-    lastDate = attemptDate;
   }
 
-  return currentStreak;
+  // Check if streak is current
+  const mostRecentDate = new Date(dailyAttempts[0].date);
+  mostRecentDate.setHours(0, 0, 0, 0);
+  const daysSinceLastAttempt = Math.floor(
+    (today.getTime() - mostRecentDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  return daysSinceLastAttempt <= 1 ? streak : 0;
+  return daysSinceLastAttempt <= 1 ? streak : 0;
 }
 
 export async function checkAndUpdateAchievements(userId: string) {
