@@ -71,7 +71,7 @@ export default function GoalsForDays() {
   };
 
   return (
-    <Card className="bg-white bg-opacity-80 backdrop-blur-sm col-span-2 shadow-lg">
+    <Card className="bg-opacity-80 backdrop-blur-sm col-span-2 shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-2xl font-bold">Goals for Days</CardTitle>
       </CardHeader>
