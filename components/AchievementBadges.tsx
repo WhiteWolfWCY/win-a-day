@@ -17,7 +17,7 @@ export default function AchievementBadges() {
 
   if (isLoading) return <Loader />;
 
-  const unlockedAchievements = achievements?.filter(a => a.unlockedAt);
+  const unlockedAchievements = achievements?.filter(achievement => achievement.unlockedAt);
 
   return (
     <div className="space-y-4">
@@ -27,7 +27,7 @@ export default function AchievementBadges() {
           <p className="text-sm text-muted-foreground">No achievements unlocked yet</p>
         ) : (
           <TooltipProvider>
-            {unlockedAchievements?.map(({ achievement, unlockedAt }) => (
+            {unlockedAchievements?.map((achievement) => (
               <Tooltip key={achievement.id}>
                 <TooltipTrigger asChild>
                   <Card className="w-12 h-12 flex items-center justify-center text-2xl cursor-help transition-transform hover:scale-110">
@@ -39,7 +39,7 @@ export default function AchievementBadges() {
                     <p className="font-semibold">{achievement.name}</p>
                     <p className="text-sm">{achievement.description}</p>
                     <p className="text-xs text-muted-foreground">
-                      Unlocked on {new Date(unlockedAt!).toLocaleDateString()}
+                      Unlocked on {achievement.unlockedAt?.toLocaleDateString()}
                     </p>
                   </div>
                 </TooltipContent>
