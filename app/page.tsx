@@ -9,11 +9,11 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-background/85 flex flex-col relative overflow-hidden">
       {[...Array(20)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full bg-yellow-200 opacity-20"
+          className="absolute rounded-full bg-primary/20"
           style={{
             width: Math.random() * 100 + 50,
             height: Math.random() * 100 + 50,
@@ -33,15 +33,15 @@ export default function Home() {
         />
       ))}
 
-      <header className="w-full p-6 bg-white bg-opacity-80 backdrop-blur-sm">
+      <header className="w-full p-6 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/" className="flex items-center space-x-3">
-            <Calendar className="h-8 w-8 text-yellow-500" />
+            <Calendar className="h-8 w-8 text-primary" />
             <span className="font-bold text-2xl">Win a Day</span>
           </Link>
           <div className="flex items-center justify-center gap-4">
             <Link href="/dashboard/home">
-              <Button size="sm" className="flex items-center justify-center hover:bg-yellow-600">
+              <Button size="sm" className="flex items-center justify-center">
                 Dive in
                 <ArrowRight className="h-10 w-10" />
               </Button>
@@ -62,12 +62,12 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             Transform Your Habits,{" "}
-            <span className="text-yellow-500">Win a Day</span> 🏆
+            <span className="text-primary">Win a Day</span> 🏆
           </motion.h1>
           <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mt-12 md:mt-20">
             <div className="md:w-1/2 space-y-8">
               <motion.p
-                className="text-xl md:text-2xl text-gray-600 text-center"
+                className="text-xl md:text-2xl text-white/80 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
@@ -84,7 +84,7 @@ export default function Home() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                  className="bg-primary hover:bg-primary/90"
                 >
                   <Link href="/dashboard/home">
                     Start Your Journey <ArrowRight className="h-8 w-8" />
@@ -99,19 +99,19 @@ export default function Home() {
               className="w-3/4 md:w-1/2"
             >
               <div className="relative mt-12 md:mt-0">
-                <div className="absolute z-20 -top-8 -left-8 bg-yellow-200 rounded-full p-4">
-                  <TrendingUp className="h-8 w-8 text-yellow-600" />
+                <div className="absolute z-20 -top-8 -left-8 bg-primary/20 rounded-full p-4">
+                  <TrendingUp className="h-8 w-8 text-primary" />
                 </div>
-                <div className="absolute z-20 -bottom-8 -right-8 bg-yellow-200 rounded-full p-4">
-                  <Award className="h-8 w-8 text-yellow-600" />
+                <div className="absolute z-20 -bottom-8 -right-8 bg-primary/20 rounded-full p-4">
+                  <Award className="h-8 w-8 text-primary" />
                 </div>
-                <div className="bg-white rounded-2xl shadow-2xl p-8 h-80 flex items-center justify-center relative overflow-hidden">
+                <div className="bg-card rounded-2xl shadow-2xl p-8 h-80 flex items-center justify-center relative overflow-hidden">
                   <span className="text-9xl">🎯</span>
                   <div className="absolute top-4 right-4 flex space-x-1">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className="h-6 w-6 text-yellow-400"
+                        className="h-6 w-6 text-primary"
                         fill="currentColor"
                       />
                     ))}
@@ -131,23 +131,23 @@ export default function Home() {
             Why Choose Win a Day?
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <Card className="transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <CardContent className="flex flex-col items-center justify-center text-center py-12">
                 <CheckCircle className="h-12 w-12 text-primary mb-4" />
                 <h1 className="text-2xl font-bold">Track Good Habits</h1>
                 <p className="text-muted-foreground">Set and monitor positive habits to improve your daily routine.</p>
               </CardContent>
             </Card>
-            <Card className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <Card className="transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <CardContent className="flex flex-col items-center justify-center text-center py-12">
-              <XCircle className="h-12 w-12 text-primary mb-4" />
+                <XCircle className="h-12 w-12 text-primary mb-4" />
                 <h1 className="text-2xl font-bold">Break Bad Habits</h1>
                 <p className="text-muted-foreground">Identify and work on breaking negative habits holding you back.</p>
               </CardContent>
             </Card>
-            <Card className="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+            <Card className="transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <CardContent className="flex flex-col items-center justify-center text-center py-12">
-              <BarChart className="h-12 w-12 text-primary mb-4" />
+                <BarChart className="h-12 w-12 text-primary mb-4" />
                 <h1 className="text-2xl font-bold">Visualize Progress</h1>
                 <p className="text-muted-foreground">See your improvement over time with intuitive charts and stats.</p>
               </CardContent>
@@ -162,7 +162,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
       >
-        <ArrowRight className="h-12 w-12 text-yellow-500 animate-bounce" />
+        <ArrowRight className="h-12 w-12 text-primary animate-bounce" />
       </motion.div>
     </div>
   );

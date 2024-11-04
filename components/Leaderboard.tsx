@@ -15,7 +15,6 @@ export default function Leaderboard() {
 
   if (isLoading) return <Loader />;
 
-  // Medal emojis for top 3
   const medals = ["🥇", "🥈", "🥉"];
 
   return (
@@ -31,50 +30,51 @@ export default function Leaderboard() {
           {leaderboard?.map((user, index) => (
             <div
               key={user.userId}
-              className={`flex items-center justify-between p-4 rounded-lg bg-background/50 ${
+              className={`flex items-center justify-between p-3 sm:p-4 rounded-lg bg-background/50 ${
                 index < 3 ? "border border-yellow-500/20" : ""
               }`}
             >
-              <div className="flex items-center gap-4">
-                <span className="text-xl font-bold min-w-[2rem]">
+              {/* Left side with rank, avatar, and name */}
+              <div className="flex items-center gap-2 sm:gap-4">
+                <span className="text-lg sm:text-xl font-bold min-w-[1.5rem] sm:min-w-[2rem]">
                   {index < 3 ? medals[index] : index + 1}
                 </span>
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                   <AvatarImage src={user.imageUrl ?? ''} />
                   <AvatarFallback>
                     {user.name?.charAt(0) ?? '?'}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-semibold flex items-center gap-2">
+                  <p className="font-semibold flex items-center gap-1 text-sm sm:text-base">
                     {user.name ?? 'Anonymous'}
-                    {index === 0 && <Star className="h-4 w-4 text-yellow-500" />}
+                    {index === 0 && <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />}
                   </p>
-                  <div className="flex flex-wrap gap-3 mt-1">
-                    <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Target className="h-4 w-4 text-blue-500" />
-                      <span className="font-medium text-foreground">{user.totalHabits ?? 0}</span>
-                      habits
+                  {/* Stats for mobile */}
+                  <div className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Target className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                      {user.totalHabits ?? 0}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Medal className="h-4 w-4 text-green-500" />
-                      <span className="font-medium text-foreground">{user.completedGoals ?? 0}</span>
-                      goals
+                    <span className="flex items-center gap-1">
+                      <Medal className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                      {user.completedGoals ?? 0}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Award className="h-4 w-4 text-purple-500" />
-                      <span className="font-medium text-foreground">{user.achievementsUnlocked ?? 0}</span>
-                      achievements
+                    <span className="flex items-center gap-1">
+                      <Award className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500" />
+                      {user.achievementsUnlocked ?? 0}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-lg font-bold flex items-center justify-end gap-2">
+
+              {/* Right side with score */}
+              <div className="text-right ml-2">
+                <p className="text-base sm:text-lg font-bold flex items-center justify-end gap-1 sm:gap-2">
                   {user.totalScore ?? 0}
-                  <Flame className="h-5 w-5 text-orange-500" />
+                  <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
                 </p>
-                <p className="text-sm text-muted-foreground">points</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">points</p>
               </div>
             </div>
           ))}

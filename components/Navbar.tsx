@@ -6,7 +6,6 @@ import { BarChart2, CalendarIcon, CheckCircle, Home, Users, Menu, X, Goal, Setti
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
 
 export default function Navbar() {
     const pathname = usePathname();
@@ -30,10 +29,10 @@ export default function Navbar() {
 
     return (
         <>
-            <header className="w-full p-4 bg-background/80 backdrop-blur-sm border-b">
+            <header className="w-full p-4 bg-background/80 backdrop-blur-sm border-b relative z-50">
                 <div className="container mx-auto flex justify-between items-center">
                     <button
-                        className="lg:hidden z-20"
+                        className="lg:hidden"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     >
                         <Menu className="h-6 w-6 text-foreground" />
@@ -65,35 +64,46 @@ export default function Navbar() {
                     </div>
                 </div>
             </header>
-            <div className={cn(
-                "fixed inset-0 z-50 transition-opacity duration-300 ease-in-out",
-                mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-            )} onClick={() => setMobileMenuOpen(false)}>
-                <div className={cn(
-                    "fixed inset-y-0 left-0 w-64 shadow-lg z-50 overflow-y-auto transition-transform duration-300 ease-in-out transform",
+
+            {/* Mobile Menu Overlay */}
+            <div 
+                className={cn(
+                    "fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300",
+                    mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+                )}
+                onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Mobile Menu Panel */}
+            <div
+                className={cn(
+                    "fixed inset-y-0 left-0 w-64 bg-background border-r z-50 lg:hidden transition-transform duration-300 ease-in-out transform",
                     mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-                )}>
-                    <div className="p-4 space-y-4">
-                        <div className="flex justify-end">
-                            <button onClick={() => setMobileMenuOpen(false)}>
-                                <X className="h-6 w-6" />
-                            </button>
-                        </div>
-                        {navItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    "flex items-center space-x-2 text-gray-600 hover:text-yellow-500 p-2",
-                                    pathname === item.href && "text-yellow-500"
-                                )}
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                <item.icon className="h-5 w-5" />
-                                <span>{item.label}</span>
-                            </Link>
-                        ))}
+                )}
+            >
+                <div className="p-4 space-y-4">
+                    <div className="flex justify-end">
+                        <button 
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-muted-foreground hover:text-primary"
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
                     </div>
+                    {navItems.map((item) => (
+                        <Link
+                            key={item.href}
+                            href={item.href}
+                            className={cn(
+                                "flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors p-2",
+                                pathname === item.href && "text-primary"
+                            )}
+                            onClick={() => setMobileMenuOpen(false)}
+                        >
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.label}</span>
+                        </Link>
+                    ))}
                 </div>
             </div>
         </>
