@@ -79,7 +79,10 @@ export default function HabitsPage() {
                     <TableRow key={habit.id}>
                       <TableCell>{habit.name}</TableCell>
                       <TableCell>
-                        {habit.habitCategoryIcon || ""} {habit.habitCategory || ""}
+                        <span className="flex items-center gap-1">
+                          <span>{habit.habitCategoryIcon}</span>
+                          <span>{habit.habitCategory}</span>
+                        </span>
                       </TableCell>
                       <TableCell>
                         {habit.isGoodHabit ? (

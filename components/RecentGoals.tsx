@@ -52,10 +52,22 @@ export default function RecentGoals() {
         ) : goals && goals.length > 0 ? (
           <div className="h-full flex flex-col justify-between pb-16">
             {goals?.map((goal, index) => (
-              <div key={index} className="flex flex-col py-4">
+              <div 
+                key={index} 
+                className={`flex flex-col py-4 ${
+                  goal.isCompleted ? "bg-green-50/50 dark:bg-green-950/20 rounded-lg px-3" : ""
+                }`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold">{goal.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{goal.name}</h3>
+                      {goal.isCompleted && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                          Completed
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-500">Habit: {goal.habitName}</p>
                   </div>
                   <GoalMenu
