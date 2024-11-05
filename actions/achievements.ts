@@ -4,6 +4,7 @@ import { db } from "@/db/drizzle";
 import { Achievements, UserAchievements, AchievementCategory, Goals, Habits, GoalsAttempts } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { updateUserStats } from "./stats";
+import { sendNotification } from "./notifications/service";
 
 export async function getAchievements() {
   const achievements = await db.select().from(Achievements);
@@ -81,6 +82,13 @@ export async function updateAchievementProgress(
 
   if (isUnlocked && !existingProgress?.unlockedAt) {
     await updateUserStats(userId);
+    await sendNotification({
+      userId,
+      type: 'achievement',
+      title: `🏆 Achievement Unlocked: ${achievement.name}!`,
+      message: `Congratulations! You've earned the "${achievement.name}" achievement. ${achievement.description}`,
+      link: `/dashboard/settings`
+    });
   }
 }
 

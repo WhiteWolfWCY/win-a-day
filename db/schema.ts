@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { boolean, date, integer, uuid, timestamp } from "drizzle-orm/pg-core";
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { pgEnum } from "drizzle-orm/pg-core";
@@ -26,6 +27,13 @@ export enum AchievementCategory {
   SOCIAL = "Social"
 }
 
+export enum NotificationFrequency {
+  DAILY = "Daily",
+  WEEKLY = "Weekly",
+  MONTHLY = "Monthly",
+  NEVER = "Never"
+}
+
 export const goalPriorityEnum = pgEnum("priority", [GoalPriority.LOW, GoalPriority.MEDIUM, GoalPriority.HIGH]);
 export const weekDaysEnum = pgEnum("weekdays", [WeekDays.MONDAY, WeekDays.TUESDAY, WeekDays.WEDNESDAY, WeekDays.THURSDAY, WeekDays.FRIDAY, WeekDays.SATURDAY, WeekDays.SUNDAY]);
 export const achievementCategoryEnum = pgEnum("achievement_category", [
@@ -33,6 +41,12 @@ export const achievementCategoryEnum = pgEnum("achievement_category", [
   AchievementCategory.GOALS,
   AchievementCategory.STREAKS,
   AchievementCategory.SOCIAL
+]);
+export const notificationFrequencyEnum = pgEnum("notification_frequency", [
+  NotificationFrequency.DAILY,
+  NotificationFrequency.WEEKLY,
+  NotificationFrequency.MONTHLY,
+  NotificationFrequency.NEVER
 ]);
 
 export const Users = pgTable("users", {
@@ -110,5 +124,32 @@ export const UserStats = pgTable("user_stats", {
   achievementsUnlocked: integer("achievementsUnlocked").default(0),
   totalScore: integer("totalScore").default(0),
   lastUpdated: timestamp("lastUpdated").defaultNow()
+});
+
+export const UserNotificationSettings = pgTable("user_notification_settings", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("userId").references(() => Users.id),
+  
+  // General notification settings
+  notificationsEnabled: boolean("notifications_enabled").default(true),
+  emailNotificationsEnabled: boolean("email_notifications_enabled").default(true),
+  
+  // Achievement notifications
+  achievementNotifications: boolean("achievement_notifications").default(true),
+  
+  // Goal notifications
+  goalCompletionNotifications: boolean("goal_completion_notifications").default(true),
+  goalUpdatesNotifications: boolean("goal_updates_notifications").default(true),
+  
+  // Habit notifications
+  habitUpdatesNotifications: boolean("habit_updates_notifications").default(true),
+  
+  // Reminder settings
+  reminderFrequency: notificationFrequencyEnum("reminder_frequency").default(NotificationFrequency.DAILY),
+  reminderTime: timestamp("reminder_time").default(sql`CURRENT_TIMESTAMP`), // Time of day to send reminders
+  
+  // Metadata
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
