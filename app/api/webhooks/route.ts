@@ -2,6 +2,9 @@ import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { createCategory, createUser } from '@/actions/actions'
+import { db } from "@/db/drizzle";
+import { UserNotificationSettings, NotificationFrequency } from "@/db/schema";
+
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
 
@@ -50,7 +53,6 @@ export async function POST(req: Request) {
 
   const CATEGORIES = ["Physical", "Mental", "Emotional", "Financial", "Social", "Spiritual", "Self-Care"]
 
-
   if(evt.type === 'user.created') {
     const userData = {
         id: evt.data.id,
@@ -59,13 +61,32 @@ export async function POST(req: Request) {
         imgUrl: evt.data.image_url,
         joinDate: new Date().toISOString(),
     }
+    
+    // Create user
     await createUser(userData)
 
-    CATEGORIES.forEach(async (category) => {
+    // Create default categories
+    for (const category of CATEGORIES) {
         await createCategory({
             name: category,
             userId: evt.data.id,
         })
+    }
+
+    // Create default notification settings
+    const defaultReminderTime = new Date();
+    defaultReminderTime.setHours(9, 0, 0, 0); // Set default reminder time to 9 AM
+
+    await db.insert(UserNotificationSettings).values({
+      userId: evt.data.id,
+      notificationsEnabled: true,
+      emailNotificationsEnabled: true,
+      achievementNotifications: true,
+      goalCompletionNotifications: true,
+      goalUpdatesNotifications: true,
+      habitUpdatesNotifications: true,
+      reminderFrequency: NotificationFrequency.DAILY,
+      reminderTime: defaultReminderTime,
     });
   }
 

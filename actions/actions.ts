@@ -344,17 +344,28 @@ export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: 
     .where(eq(GoalsAttempts.id, goalAttemptId));
 
   if (goalAttempt) {
-    // Always update achievements and stats when a goal attempt is updated
     await checkAndUpdateAchievements(goalAttempt.userId!);
     await updateUserStats(goalAttempt.userId!);
 
     // Check if the goal should be marked as completed
     if (goalAttemptData.isCompleted && 
         goalAttempt.completedAttempts >= goalAttempt.goal.goalSuccess) {
+      
+      // Mark goal as completed
       await db
         .update(Goals)
         .set({ isCompleted: true })
         .where(eq(Goals.id, goalAttempt.goal.id));
+
+      // Delete remaining attempts for this goal
+      await db
+        .delete(GoalsAttempts)
+        .where(
+          and(
+            eq(GoalsAttempts.goalId, goalAttempt.goal.id),
+            eq(GoalsAttempts.isCompleted, false)
+          )
+        );
 
       await handleGoalCompletion(goalAttempt.goal.userId!, goalAttempt.goal.id, goalAttempt.goal.name);
     }
@@ -518,7 +529,8 @@ export async function getUserGoalsForDay(date: string, userId: string) {
     .where(
       and(
         eq(GoalsAttempts.date, date),
-        eq(Goals.userId, userId) 
+        eq(Goals.userId, userId),
+        eq(Goals.isCompleted, false)
       )
     );
 
