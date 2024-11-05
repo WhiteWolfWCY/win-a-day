@@ -42,6 +42,8 @@ export default function GoalsForDays() {
       queryClient.invalidateQueries({ queryKey: ['habit-adherence', userId] });
       queryClient.invalidateQueries({ queryKey: ['goalAttempts'] });
       queryClient.invalidateQueries({ queryKey: ['goal-completion-rate'] });
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
     },
   });
 
