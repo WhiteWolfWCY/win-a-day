@@ -109,6 +109,8 @@ export default function AddHabitDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
       queryClient.invalidateQueries({ queryKey: ["user-habits"] });
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setIsDialogOpen(false);
       form.reset();
       toast({
@@ -140,6 +142,8 @@ export default function AddHabitDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
       queryClient.invalidateQueries({ queryKey: ["user-habits"] });
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setIsDialogOpen(false);
       toast({
         title: "Habit updated",

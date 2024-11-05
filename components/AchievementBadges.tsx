@@ -10,7 +10,7 @@ import Loader from "./Loader";
 export default function AchievementBadges() {
   const { userId } = useAuth();
   const { data: achievements, isLoading } = useQuery({
-    queryKey: ["achievements", userId],
+    queryKey: ["user-achievements", userId],
     queryFn: () => getUserAchievements(userId!),
     enabled: !!userId,
   });
