@@ -67,7 +67,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mt-12 md:mt-20">
             <div className="md:w-1/2 space-y-8">
               <motion.p
-                className="text-xl md:text-2xl text-white/80 text-center"
+                className="text-xl md:text-2xl text-muted-foreground dark:text-white/80 text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}

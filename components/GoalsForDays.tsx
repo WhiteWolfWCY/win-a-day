@@ -17,6 +17,7 @@ import { Button } from "./ui/button";
 import { NotebookIcon, Loader2, StickyNoteIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { isFuture } from 'date-fns';
+import { cn } from "@/lib/utils";
 
 export default function GoalsForDays() {
   const {userId} = useAuth();
@@ -27,14 +28,48 @@ export default function GoalsForDays() {
   const [currentNote, setCurrentNote] = useState("");
   const [currentGoalAttemptId, setCurrentGoalAttemptId] = useState<string | null>(null);
 
+  const [loadingAttempts, setLoadingAttempts] = useState<Set<string>>(new Set());
+
   const { data: goalAttempts = [], isLoading } = useQuery({
     queryKey: ['goalAttempts', format(selectedDate, 'yyyy-MM-dd')],
     queryFn: () => getUserGoalsForDay(format(selectedDate, 'yyyy-MM-dd'), userId!),
   });
 
   const updateGoalAttemptMutation = useMutation({
-    mutationFn: ({ goalAttemptId, isCompleted }: { goalAttemptId: string, isCompleted: boolean }) => 
-      updateGoalAttempt(goalAttemptId, { isCompleted }),
+    mutationFn: ({ goalAttemptId, isCompleted }: { goalAttemptId: string, isCompleted: boolean }) => {
+      setLoadingAttempts(prev => new Set(prev).add(goalAttemptId));
+      return updateGoalAttempt(goalAttemptId, { isCompleted });
+    },
+    onMutate: async ({ goalAttemptId, isCompleted }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ 
+        queryKey: ['goalAttempts', format(selectedDate, 'yyyy-MM-dd')] 
+      });
+
+      // Snapshot the previous value
+      const previousAttempts = queryClient.getQueryData(['goalAttempts', format(selectedDate, 'yyyy-MM-dd')]);
+
+      // Optimistically update to the new value
+      queryClient.setQueryData(
+        ['goalAttempts', format(selectedDate, 'yyyy-MM-dd')],
+        (old: any) => old.map((attempt: any) => 
+          attempt.goalAttempt.id === goalAttemptId 
+            ? { ...attempt, goalAttempt: { ...attempt.goalAttempt, isCompleted } }
+            : attempt
+        )
+      );
+
+      return { previousAttempts };
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousAttempts) {
+        queryClient.setQueryData(
+          ['goalAttempts', format(selectedDate, 'yyyy-MM-dd')],
+          context.previousAttempts
+        );
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goalAttempts', format(selectedDate, 'yyyy-MM-dd')] });
       queryClient.invalidateQueries({ queryKey: ['recent-goals'] });
@@ -44,6 +79,13 @@ export default function GoalsForDays() {
       queryClient.invalidateQueries({ queryKey: ['goal-completion-rate'] });
       queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
+    },
+    onSettled: (_, __, variables) => {
+      setLoadingAttempts(prev => {
+        const next = new Set(prev);
+        next.delete(variables.goalAttemptId);
+        return next;
+      });
     },
   });
 
@@ -95,7 +137,13 @@ export default function GoalsForDays() {
             ) : goalAttempts.length > 0 ? (
               <ScrollArea className="pr-4">
                 {goalAttempts.map((attempt) => (
-                  <div key={attempt.goalAttempt.id} className="py-3 flex items-center justify-between border-b last:border-b-0">
+                  <div 
+                    key={attempt.goalAttempt.id} 
+                    className={cn(
+                      "py-3 flex items-center justify-between border-b last:border-b-0",
+                      loadingAttempts.has(attempt.goalAttempt.id) && "opacity-50 pointer-events-none"
+                    )}
+                  >
                     <div className={`flex-1 ${attempt.goalAttempt.isCompleted ? 'line-through text-gray-400' : ''}`}>
                       <div className="flex items-center space-x-2">
                         <h4 className="font-medium">{attempt.goal.name}</h4>
@@ -121,14 +169,21 @@ export default function GoalsForDays() {
                         variant="ghost"
                         size="icon"
                         onClick={() => openNoteDialog(attempt.goalAttempt.id, attempt.goalAttempt.note || '')}
+                        disabled={loadingAttempts.has(attempt.goalAttempt.id)}
                       >
                         <NotebookIcon className="h-4 w-4" />
                       </Button>
                       {!isFuture(new Date(attempt.goalAttempt.date)) && (
-                        <Checkbox
-                          checked={attempt.goalAttempt.isCompleted || false}
-                          onCheckedChange={(checked) => toggleGoalCompletion(attempt.goalAttempt.id, checked as boolean)}
-                        />
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={attempt.goalAttempt.isCompleted || false}
+                            onCheckedChange={(checked) => toggleGoalCompletion(attempt.goalAttempt.id, checked as boolean)}
+                            disabled={loadingAttempts.has(attempt.goalAttempt.id)}
+                          />
+                          {loadingAttempts.has(attempt.goalAttempt.id) && (
+                            <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
