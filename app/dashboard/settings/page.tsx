@@ -11,6 +11,7 @@ import ManageCategories from "@/components/ManageCategories";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import AchievementBadges from "@/components/AchievementBadges";
 import AchievementsDialog from "@/components/AchievementsDialog";
+import NotificationSettings from "@/components/NotificationSettings";
 
 export default function SettingsPage() {
   const { user, isLoaded } = useUser();
@@ -76,7 +77,9 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      <NotificationSettings />
       <ManageCategories />
+
     </main>
   );
 }

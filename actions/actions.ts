@@ -2,11 +2,12 @@
 
 import { db } from "@/db/drizzle";
 import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays, Achievements, UserAchievements, AchievementCategory } from "@/db/schema";
-import { eq, and, desc, sql, inArray, gte, lte } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, gte, lte, or, lt, gt, notInArray } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 import { parseISO, subDays, startOfDay, endOfDay } from 'date-fns';
 import { checkAndUpdateAchievements, getCurrentStreak, updateAchievementProgress } from "./achievements";
 import { updateUserStats } from "./stats";
+import { sendNotification } from "./notifications/service";
 
 
 type NewHabit = Omit<InferInsertModel<typeof Habits>, 'id'>;
@@ -65,13 +66,16 @@ export async function deleteUser(userId: string) {
 
 //create a Habit
 export async function createHabit(habitData: NewHabit) {
-  const [newHabit] = await db
-    .insert(Habits)
-    .values(habitData)
-    .returning();
+  const [newHabit] = await db.insert(Habits).values(habitData).returning();
+  
+  await sendNotification({
+    userId: habitData.userId!,
+    type: 'habitUpdate',
+    title: `✨ New Habit Created`,
+    message: `You've created a new habit: "${habitData.name}"`,
+    link: `/dashboard/habits`
+  });
 
-  await checkAndUpdateAchievements(habitData.userId!);
-  await updateUserStats(habitData.userId!);
   return newHabit;
 }
 
@@ -188,12 +192,23 @@ export async function updateGoal(goalData: {
   
   // Get the user ID for this goal
   const [goal] = await db
-    .select({ userId: Goals.userId })
+    .select({ 
+      userId: Goals.userId,
+      habitName: Habits.name 
+    })
     .from(Goals)
+    .innerJoin(Habits, eq(Goals.habitId, Habits.id))
     .where(eq(Goals.id, goalData.id));
     
   if (goal) {
     await checkAndUpdateAchievements(goal.userId!);
+    await sendNotification({
+      userId: goal.userId!,
+      type: 'goalUpdate',
+      title: `🎯 Goal Updated`,
+      message: `Your goal for habit "${goal.habitName}" has been updated`,
+      link: `/dashboard/goals`
+    });
   }
   
   return updatedGoal;
@@ -340,6 +355,8 @@ export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: 
         .update(Goals)
         .set({ isCompleted: true })
         .where(eq(Goals.id, goalAttempt.goal.id));
+
+      await handleGoalCompletion(goalAttempt.goal.userId!, goalAttempt.goal.id, goalAttempt.goal.name);
     }
   }
 
@@ -383,31 +400,21 @@ export async function createHabitWithCategory(habitData: {
   return newHabit;
 }
 
-export async function updateHabit(habitData: {
-  id: string;
-  name: string;
-  categoryId: string;
-  isGood: boolean;
-}) {
+export async function updateHabit(habitId: string, habitData: Partial<NewHabit>) {
   const [updatedHabit] = await db
     .update(Habits)
-    .set({
-      name: habitData.name,
-      categoryId: habitData.categoryId,
-      isGoodHabit: habitData.isGood,
-    })
-    .where(eq(Habits.id, habitData.id))
+    .set(habitData)
+    .where(eq(Habits.id, habitId))
     .returning();
 
-  // Get userId for the habit
-  const [habit] = await db
-    .select({ userId: Habits.userId })
-    .from(Habits)
-    .where(eq(Habits.id, habitData.id));
+  await sendNotification({
+    userId: habitData.userId!,
+    type: 'habitUpdate',
+    title: `📝 Habit Updated`,
+    message: `Your habit "${habitData.name}" has been updated`,
+    link: `/dashboard/habits`
+  });
 
-  if (habit) {
-    await updateUserStats(habit.userId!);
-  }
   return updatedHabit;
 }
 
@@ -441,13 +448,62 @@ export async function getRecentGoalsForUser(userId: string) {
 
 // update goal attempts for a goal
 export async function updateGoalAttemptsForGoal(goalId: string) {
- await db.select().from(Goals).where(eq(Goals.id, goalId));
+  const [goal] = await db.select().from(Goals).where(eq(Goals.id, goalId));
+  const { startDate, finishDate, weekDays } = goal;
 
-  // Delete existing goal attempts
-  await db.delete(GoalsAttempts).where(eq(GoalsAttempts.goalId, goalId));
+  // Get existing attempts
+  const existingAttempts = await db
+    .select()
+    .from(GoalsAttempts)
+    .where(eq(GoalsAttempts.goalId, goalId));
 
-  // Create new goal attempts
-  await createGoalAttemptsForGoal(goalId);
+  // Create a Set of existing dates (they're already in YYYY-MM-DD format)
+  const existingDates = new Set(
+    existingAttempts.map(attempt => attempt.date)
+  );
+
+  const startDateObj = new Date(startDate);
+  const endDateObj = new Date(finishDate);
+
+  const newGoalAttemptsToInsert: NewGoalAttempt[] = [];
+
+  // Create attempts only for dates that don't have them yet
+  for (let date = startDateObj; date <= endDateObj; date.setDate(date.getDate() + 1)) {
+    const dateStr = date.toISOString().split('T')[0];
+    const dayOfWeek = date.getDay();
+    const weekDay = Object.values(WeekDays)[(dayOfWeek + 6) % 7];
+    
+    if (weekDays!.includes(weekDay) && !existingDates.has(dateStr)) {
+      newGoalAttemptsToInsert.push({
+        goalId: goal.id,
+        date: dateStr,
+        isCompleted: false,
+        note: "",
+      });
+    }
+  }
+
+  // Only insert new attempts if there are any
+  if (newGoalAttemptsToInsert.length > 0) {
+    await db.insert(GoalsAttempts).values(newGoalAttemptsToInsert);
+  }
+
+  // Remove attempts that are no longer within the date range or on selected weekdays
+  await db
+    .delete(GoalsAttempts)
+    .where(
+      and(
+        eq(GoalsAttempts.goalId, goalId),
+        or(
+          lt(GoalsAttempts.date, startDate),
+          gt(GoalsAttempts.date, finishDate),
+          notInArray(
+            sql`EXTRACT(DOW FROM ${GoalsAttempts.date}::date)::integer`,
+            weekDays!.map(day => Object.values(WeekDays).indexOf(day))
+          )
+        )
+      )
+    );
 }
 
 // Get user goals for a specific day
@@ -768,29 +824,16 @@ export async function getCategoryDistribution(userId: string): Promise<CategoryD
 
 */
 
+async function handleGoalCompletion(userId: string, goalId: string, goalName: string) {
+  await sendNotification({
+    userId,
+    type: 'goalCompletion',
+    title: `🎯 Goal Completed!`,
+    message: `Congratulations! You've completed your goal: "${goalName}"`,
+    link: `/dashboard/goals`
+  });
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Add to existing goal completion logic:
+startLine: 414
+endLine: 440
