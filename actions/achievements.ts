@@ -1,5 +1,5 @@
 "use server"
-
+//to obsluguje osiagniecia uzytkownika
 import { db } from "@/db/drizzle";
 import { Achievements, UserAchievements, AchievementCategory, Goals, Habits, GoalsAttempts } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
