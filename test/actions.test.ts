@@ -42,6 +42,8 @@ jest.mock('@/db/drizzle', () => ({
 }));
 */
 
+/*na górze temp*/
+
 const mockDb = db as unknown as DeepMockProxy<typeof db>;
 
 // Na początku pliku testowego
