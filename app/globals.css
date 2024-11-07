@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -31,6 +29,9 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --background-start: 0, 0%, 100%;
+    --background-end: 0, 0%, 95%;
+    --floating-element: 47.9, 95.8%, 53.1%;
   }
 
   .dark {
@@ -58,5 +59,16 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --background-start: 20, 14.3%, 4.1%;
+    --background-end: 20, 14.3%, 8%;
+    --floating-element: 47.9, 95.8%, 40%;
   }
+}
+
+.bg-gradient-custom {
+  @apply bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))];
+}
+
+.floating-element {
+  @apply bg-[hsl(var(--floating-element))] opacity-20;
 }

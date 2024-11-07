@@ -68,8 +68,8 @@ export default function AnalyticsPage() {
 
   const { data: goalCompletionRate, isLoading: isLoadingGoalCompletionRate } =
     useQuery({
-      queryKey: ["goal-completion-rate", userId],
-      queryFn: () => getGoalCompletionRateOverTime(userId!),
+      queryKey: ["goal-completion-rate", userId, dateRange.from, dateRange.to],
+      queryFn: () => getGoalCompletionRateOverTime(userId!, dateRange.from, dateRange.to),
       enabled: !!userId,
     });
 
@@ -314,19 +314,9 @@ function HabitStreaksChart({ data }: { data: any[] }) {
 }
 
 function GoalCompletionRateChart({ data }: { data: any[] }) {
-  const today = startOfDay(new Date());
-  const oneMonthAgo = subDays(today, 30);
-
-  // Filter out future dates and ensure we have data for the last 30 days
-  const filteredData = Array.from({ length: 31 }, (_, i) => {
-    const date = subDays(today, i);
-    const existingData = data.find(
-      (d) => d.date === format(date, "yyyy-MM-dd")
-    );
-    return (
-      existingData || { date: format(date, "yyyy-MM-dd"), completionRate: 0 }
-    );
-  }).reverse();
+  const sortedData = [...data].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
 
   return (
     <Card>
@@ -336,28 +326,23 @@ function GoalCompletionRateChart({ data }: { data: any[] }) {
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
-            data={filteredData}
+            data={sortedData}
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="date"
-              tickFormatter={(dateString) =>
-                format(new Date(dateString), "MMM dd")
-              }
-              domain={[oneMonthAgo.toISOString(), today.toISOString()]}
-              type="category"
-              scale="time"
+              tickFormatter={(date) => format(new Date(date), "MMM dd")}
+              interval="preserveStartEnd"
+              minTickGap={30}
             />
-            <YAxis domain={[0, 100]} />
+            <YAxis 
+              domain={[0, 100]}
+              tickFormatter={(value) => `${value}%`}
+            />
             <Tooltip
-              labelFormatter={(dateString) =>
-                format(new Date(dateString as string), "MMM dd, yyyy")
-              }
-              formatter={(value) => [
-                `${Number(value).toFixed(2)}%`,
-                "Completion Rate",
-              ]}
+              labelFormatter={(date) => format(new Date(date as string), "MMM dd, yyyy")}
+              formatter={(value) => [`${Number(value).toFixed(1)}%`, "Completion Rate"]}
             />
             <Legend />
             <Line
@@ -366,6 +351,7 @@ function GoalCompletionRateChart({ data }: { data: any[] }) {
               stroke="#fbbf24"
               activeDot={{ r: 8 }}
               name="Completion Rate"
+              dot={false}
             />
           </LineChart>
         </ResponsiveContainer>

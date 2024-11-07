@@ -109,6 +109,8 @@ export default function AddHabitDialog({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
       queryClient.invalidateQueries({ queryKey: ["user-habits"] });
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setIsDialogOpen(false);
       form.reset();
       toast({
@@ -127,15 +129,21 @@ export default function AddHabitDialog({
   });
 
   const updateHabitMutation = useMutation({
-    mutationFn: (habitData: {
+    mutationFn: (data: {
       id: string;
       name: string;
       categoryId: string;
       isGood: boolean;
-    }) => updateHabit(habitData),
+    }) => updateHabit(data.id, {
+      name: data.name,
+      categoryId: data.categoryId,
+      isGoodHabit: data.isGood,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
       queryClient.invalidateQueries({ queryKey: ["user-habits"] });
+      queryClient.invalidateQueries({ queryKey: ["user-achievements"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setIsDialogOpen(false);
       toast({
         title: "Habit updated",

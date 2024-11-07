@@ -1,10 +1,13 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays } from "@/db/schema";
-import { eq, and, desc, sql, inArray, gte, lte } from "drizzle-orm";
+import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays, Achievements, UserAchievements, AchievementCategory } from "@/db/schema";
+import { eq, and, desc, sql, inArray, gte, lte, or, lt, gt, notInArray } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 import { parseISO, subDays, startOfDay, endOfDay } from 'date-fns';
+import { checkAndUpdateAchievements, getCurrentStreak, updateAchievementProgress } from "./achievements";
+import { updateUserStats } from "./stats";
+import { sendNotification } from "./notifications/service";
 
 
 type NewHabit = Omit<InferInsertModel<typeof Habits>, 'id'>;
@@ -63,25 +66,34 @@ export async function deleteUser(userId: string) {
 
 //create a Habit
 export async function createHabit(habitData: NewHabit) {
-  const [newHabit] = await db
-    .insert(Habits)
-    .values(habitData)
-    .returning();
+  const [newHabit] = await db.insert(Habits).values(habitData).returning();
+  
+  await sendNotification({
+    userId: habitData.userId!,
+    type: 'habitUpdate',
+    title: `✨ New Habit Created`,
+    message: `You've created a new habit: "${habitData.name}"`,
+    link: `/dashboard/habits`
+  });
+
   return newHabit;
 }
 
 //get all habits
 export async function getAllHabitsForUser(userId: string) {
-  const habits = await db.select({
-    id: Habits.id,
-    name: Habits.name,
-    isGoodHabit: Habits.isGoodHabit,
-    categoryId: Categories.id,
-    habitCategory: Categories.name,
-    habitCategoryIcon: Categories.icon,
-  }).from(Habits)
+  const habits = await db
+    .select({
+      id: Habits.id,
+      name: Habits.name,
+      isGoodHabit: Habits.isGoodHabit,
+      categoryId: Categories.id,
+      habitCategory: Categories.name,
+      habitCategoryIcon: Categories.icon,
+    })
+    .from(Habits)
     .innerJoin(Categories, eq(Habits.categoryId, Categories.id))
     .where(eq(Habits.userId, userId));
+  
   return habits;
 }
 
@@ -127,6 +139,8 @@ export async function getLastThreeHabits(userId: string) {
 export async function createGoal(goalData: NewGoal) {
   const [newGoal] = await db.insert(Goals).values(goalData).returning();
   await createGoalAttemptsForGoal(newGoal.id);
+  await checkAndUpdateAchievements(goalData.userId!);
+  await updateUserStats(goalData.userId!);
   return newGoal;
 }
 
@@ -139,6 +153,7 @@ export async function getAllUserGoals(userId: string) {
     habitId: Goals.habitId,
     habitName: Habits.name,
     priority: Goals.priority,
+    isCompleted: Goals.isCompleted,
     startDate: Goals.startDate,
     finishDate: Goals.finishDate,
     goalSuccess: Goals.goalSuccess,
@@ -174,6 +189,28 @@ export async function updateGoal(goalData: {
     .where(eq(Goals.id, goalData.id))
     .returning();
   await updateGoalAttemptsForGoal(updatedGoal.id);
+  
+  // Get the user ID for this goal
+  const [goal] = await db
+    .select({ 
+      userId: Goals.userId,
+      habitName: Habits.name 
+    })
+    .from(Goals)
+    .innerJoin(Habits, eq(Goals.habitId, Habits.id))
+    .where(eq(Goals.id, goalData.id));
+    
+  if (goal) {
+    await checkAndUpdateAchievements(goal.userId!);
+    await sendNotification({
+      userId: goal.userId!,
+      type: 'goalUpdate',
+      title: `🎯 Goal Updated`,
+      message: `Your goal for habit "${goal.habitName}" has been updated`,
+      link: `/dashboard/goals`
+    });
+  }
+  
   return updatedGoal;
 }
 
@@ -209,7 +246,8 @@ export async function getUserGoalsForToday(userId: string) {
         eq(Goals.userId, userId),
         eq(GoalsAttempts.date, todayStr)
       )
-    );
+    )
+    .execute();
 
   return goalAttemptsForToday;
 }
@@ -283,7 +321,56 @@ export async function createGoalAttemptsForGoal(goalId: string) {
 
 //update a goal attempt
 export async function updateGoalAttempt(goalAttemptId: string, goalAttemptData: Partial<NewGoalAttempt>) {
-  const [updatedGoalAttempt] = await db.update(GoalsAttempts).set(goalAttemptData).where(eq(GoalsAttempts.id, goalAttemptId)).returning();
+  const [updatedGoalAttempt] = await db
+    .update(GoalsAttempts)
+    .set(goalAttemptData)
+    .where(eq(GoalsAttempts.id, goalAttemptId))
+    .returning();
+
+  // Get the goal's userId for updating achievements and stats
+  const [goalAttempt] = await db
+    .select({
+      goal: Goals,
+      userId: Goals.userId,
+      completedAttempts: sql<number>`(
+        SELECT COUNT(*)
+        FROM ${GoalsAttempts}
+        WHERE ${GoalsAttempts.goalId} = ${Goals.id}
+        AND ${GoalsAttempts.isCompleted} = true
+      )`
+    })
+    .from(GoalsAttempts)
+    .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
+    .where(eq(GoalsAttempts.id, goalAttemptId));
+
+  if (goalAttempt) {
+    await checkAndUpdateAchievements(goalAttempt.userId!);
+    await updateUserStats(goalAttempt.userId!);
+
+    // Check if the goal should be marked as completed
+    if (goalAttemptData.isCompleted && 
+        goalAttempt.completedAttempts >= goalAttempt.goal.goalSuccess) {
+      
+      // Mark goal as completed
+      await db
+        .update(Goals)
+        .set({ isCompleted: true })
+        .where(eq(Goals.id, goalAttempt.goal.id));
+
+      // Delete remaining attempts for this goal
+      await db
+        .delete(GoalsAttempts)
+        .where(
+          and(
+            eq(GoalsAttempts.goalId, goalAttempt.goal.id),
+            eq(GoalsAttempts.isCompleted, false)
+          )
+        );
+
+      await handleGoalCompletion(goalAttempt.goal.userId!, goalAttempt.goal.id, goalAttempt.goal.name);
+    }
+  }
+
   return updatedGoalAttempt;
 }
 
@@ -298,13 +385,15 @@ export async function createHabitWithCategory(habitData: {
     .select()
     .from(Categories)
     .where(and(eq(Categories.name, habitData.category), eq(Categories.userId, habitData.userId)))
-    .limit(1);
+    .limit(1)
+    .execute();
   
   if (!category) {
     [category] = await db.insert(Categories).values({
       name: habitData.category,
       userId: habitData.userId
-    }).returning();
+    }).returning()
+    .execute();
   }
 
   // Now create the habit
@@ -316,26 +405,27 @@ export async function createHabitWithCategory(habitData: {
       userId: habitData.userId,
       isGoodHabit: habitData.isGoodHabit,
     })
-    .returning();
+    .returning()
+    .execute();
   
   return newHabit;
 }
 
-export async function updateHabit(habitData: {
-  id: string;
-  name: string;
-  categoryId: string;
-  isGood: boolean;
-}) {
+export async function updateHabit(habitId: string, habitData: Partial<NewHabit>) {
   const [updatedHabit] = await db
     .update(Habits)
-    .set({
-      name: habitData.name,
-      categoryId: habitData.categoryId,
-      isGoodHabit: habitData.isGood,
-    })
-    .where(eq(Habits.id, habitData.id))
+    .set(habitData)
+    .where(eq(Habits.id, habitId))
     .returning();
+
+  await sendNotification({
+    userId: habitData.userId!,
+    type: 'habitUpdate',
+    title: `📝 Habit Updated`,
+    message: `Your habit "${habitData.name}" has been updated`,
+    link: `/dashboard/habits`
+  });
+
   return updatedHabit;
 }
 
@@ -347,6 +437,7 @@ export async function getRecentGoalsForUser(userId: string) {
     habitId: Goals.habitId,
     habitName: Habits.name,
     priority: Goals.priority,
+    isCompleted: Goals.isCompleted,
     startDate: Goals.startDate,
     finishDate: Goals.finishDate,
     goalSuccess: Goals.goalSuccess,
@@ -368,13 +459,62 @@ export async function getRecentGoalsForUser(userId: string) {
 
 // update goal attempts for a goal
 export async function updateGoalAttemptsForGoal(goalId: string) {
- await db.select().from(Goals).where(eq(Goals.id, goalId));
+  const [goal] = await db.select().from(Goals).where(eq(Goals.id, goalId));
+  const { startDate, finishDate, weekDays } = goal;
 
-  // Delete existing goal attempts
-  await db.delete(GoalsAttempts).where(eq(GoalsAttempts.goalId, goalId));
+  // Get existing attempts
+  const existingAttempts = await db
+    .select()
+    .from(GoalsAttempts)
+    .where(eq(GoalsAttempts.goalId, goalId));
 
-  // Create new goal attempts
-  await createGoalAttemptsForGoal(goalId);
+  // Create a Set of existing dates (they're already in YYYY-MM-DD format)
+  const existingDates = new Set(
+    existingAttempts.map(attempt => attempt.date)
+  );
+
+  const startDateObj = new Date(startDate);
+  const endDateObj = new Date(finishDate);
+
+  const newGoalAttemptsToInsert: NewGoalAttempt[] = [];
+
+  // Create attempts only for dates that don't have them yet
+  for (let date = startDateObj; date <= endDateObj; date.setDate(date.getDate() + 1)) {
+    const dateStr = date.toISOString().split('T')[0];
+    const dayOfWeek = date.getDay();
+    const weekDay = Object.values(WeekDays)[(dayOfWeek + 6) % 7];
+    
+    if (weekDays!.includes(weekDay) && !existingDates.has(dateStr)) {
+      newGoalAttemptsToInsert.push({
+        goalId: goal.id,
+        date: dateStr,
+        isCompleted: false,
+        note: "",
+      });
+    }
+  }
+
+  // Only insert new attempts if there are any
+  if (newGoalAttemptsToInsert.length > 0) {
+    await db.insert(GoalsAttempts).values(newGoalAttemptsToInsert);
+  }
+
+  // Remove attempts that are no longer within the date range or on selected weekdays
+  await db
+    .delete(GoalsAttempts)
+    .where(
+      and(
+        eq(GoalsAttempts.goalId, goalId),
+        or(
+          lt(GoalsAttempts.date, startDate),
+          gt(GoalsAttempts.date, finishDate),
+          notInArray(
+            sql`EXTRACT(DOW FROM ${GoalsAttempts.date}::date)::integer`,
+            weekDays!.map(day => Object.values(WeekDays).indexOf(day))
+          )
+        )
+      )
+    );
 }
 
 // Get user goals for a specific day
@@ -389,7 +529,8 @@ export async function getUserGoalsForDay(date: string, userId: string) {
     .where(
       and(
         eq(GoalsAttempts.date, date),
-        eq(Goals.userId, userId) 
+        eq(Goals.userId, userId),
+        eq(Goals.isCompleted, false)
       )
     );
 
@@ -405,7 +546,8 @@ export async function getOverallGoalCompletion(userId: string) {
     })
     .from(GoalsAttempts)
     .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
-    .where(eq(Goals.userId, userId));
+    .where(eq(Goals.userId, userId))
+    .execute();
 
   const { totalAttempts, completedAttempts } = result[0];
   return {
@@ -551,8 +693,12 @@ export async function getCategoryPerformance(userId: string) {
         inArray(Goals.habitId, habitIds)
       ));
 
-    const rate = completionRate[0].totalGoals > 0
-      ? (completionRate[0].completedGoals / completionRate[0].totalGoals) * 100
+      if(!completionRate || completionRate.length === 0) {
+        return { categoryName: category.name, completionRate: 0 };
+      }
+
+    const rate = completionRate[0]?.totalGoals > 0
+      ? (completionRate[0]?.completedGoals / completionRate[0]?.totalGoals) * 100
       : 0;
 
     return { categoryName: category.name, completionRate: rate };
@@ -562,15 +708,12 @@ export async function getCategoryPerformance(userId: string) {
 }
 
 // Get goal completion rate over time
-export async function getGoalCompletionRateOverTime(userId: string) {
-  const endDate = endOfDay(new Date());
-  const startDate = startOfDay(subDays(endDate, 30));
-
+export async function getGoalCompletionRateOverTime(userId: string, startDate: Date, endDate: Date) {
   const completionRates = await db
     .select({
       date: GoalsAttempts.date,
-      totalAttempts: sql<number>`COUNT(*)`,
-      completedAttempts: sql<number>`SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END)`,
+      totalAttempts: sql<number>`CAST(COUNT(*) AS INTEGER)`,
+      completedAttempts: sql<number>`CAST(SUM(CASE WHEN ${GoalsAttempts.isCompleted} THEN 1 ELSE 0 END) AS INTEGER)`,
     })
     .from(GoalsAttempts)
     .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
@@ -586,13 +729,21 @@ export async function getGoalCompletionRateOverTime(userId: string) {
 
   return completionRates.map(rate => ({
     date: rate.date,
-    completionRate: rate.totalAttempts > 0 ? (rate.completedAttempts / rate.totalAttempts) * 100 : 0,
+    completionRate: rate.totalAttempts > 0 
+      ? (Number(rate.completedAttempts) / Number(rate.totalAttempts)) * 100 
+      : 0,
   }));
 }
 
 // Get habit balance
 export async function getHabitBalance(userId: string, startDate: Date, endDate: Date) {
-  const habits = await getAllHabitsForUser(userId);
+  let habits = await getAllHabitsForUser(userId);
+  
+  // Upewnij się, że habits jest tablicą
+  if (!Array.isArray(habits)) {
+    habits = [];  // Przypisz pustą tablicę, jeśli wynik nie jest tablicą
+  }
+
   const goodHabits = habits.filter(h => h.isGoodHabit).length;
   const badHabits = habits.length - goodHabits;
 
@@ -612,10 +763,20 @@ export async function getHabitBalance(userId: string, startDate: Date, endDate: 
         lte(GoalsAttempts.date, endDate.toISOString().split('T')[0])
       )
     )
-    .groupBy(Habits.isGoodHabit);
+    .groupBy(Habits.isGoodHabit)
+    .execute();
 
-  const goodHabitStats = completionRates.find(r => r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
-  const badHabitStats = completionRates.find(r => !r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
+    if(!completionRates || completionRates.length === 0) {
+      return {
+        goodHabits: 0,
+        badHabits: 0,
+        goodHabitCompletionRate: 0,
+        badHabitCompletionRate: 0,
+      };
+    }
+
+  const goodHabitStats = completionRates?.find(r => r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
+  const badHabitStats = completionRates?.find(r => !r.isGoodHabit) || { totalAttempts: 0, completedAttempts: 0 };
 
   const goodHabitCompletionRate = goodHabitStats.totalAttempts > 0
     ? (goodHabitStats.completedAttempts / goodHabitStats.totalAttempts) * 100
@@ -632,6 +793,7 @@ export async function getHabitBalance(userId: string, startDate: Date, endDate: 
     badHabitCompletionRate,
   };
 }
+
 
 // Update the return type
 export type CategoryDistribution = {
@@ -653,7 +815,7 @@ export async function getCategoryDistribution(userId: string): Promise<CategoryD
 
     return {
       categoryName: category.name,
-      habitCount: Number(habitCount[0].count) 
+      habitCount: Number(habitCount[0]?.count) 
     };
   }));
 
@@ -674,28 +836,16 @@ export async function getCategoryDistribution(userId: string): Promise<CategoryD
 
 */
 
+async function handleGoalCompletion(userId: string, goalId: string, goalName: string) {
+  await sendNotification({
+    userId,
+    type: 'goalCompletion',
+    title: `🎯 Goal Completed!`,
+    message: `Congratulations! You've completed your goal: "${goalName}"`,
+    link: `/dashboard/goals`
+  });
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Add to existing goal completion logic:
+startLine: 414
+endLine: 440

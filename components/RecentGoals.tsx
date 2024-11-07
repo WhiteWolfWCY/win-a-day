@@ -13,6 +13,7 @@ import { Loader2, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { GoalPriority, WeekDays } from "@/db/schema";
 import Loader from "./Loader";
+import { getPriorityColorClass } from "@/lib/utils";
 
 export default function RecentGoals() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -36,7 +37,7 @@ export default function RecentGoals() {
   };
 
   return (
-    <Card className="bg-white bg-opacity-80 backdrop-blur-sm">
+    <Card className="bg-opacity-80 backdrop-blur-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-2xl font-bold">Recent Goals</CardTitle>
         <Link href="/dashboard/goals">
@@ -51,10 +52,22 @@ export default function RecentGoals() {
         ) : goals && goals.length > 0 ? (
           <div className="h-full flex flex-col justify-between pb-16">
             {goals?.map((goal, index) => (
-              <div key={index} className="flex flex-col py-4">
+              <div 
+                key={index} 
+                className={`flex flex-col py-4 ${
+                  goal.isCompleted ? "bg-green-50/50 dark:bg-green-950/20 rounded-lg px-3" : ""
+                }`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold">{goal.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{goal.name}</h3>
+                      {goal.isCompleted && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                          Completed
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-500">Habit: {goal.habitName}</p>
                   </div>
                   <GoalMenu
@@ -69,7 +82,7 @@ export default function RecentGoals() {
                   />
                 </div>
                 <div className="mt-2 text-sm">
-                  <p>Priority: <span className={`font-semibold ${getPriorityColor(goal.priority)}`}>{goal.priority}</span></p>
+                  <p>Priority: <span className={`font-semibold ${getPriorityColorClass(goal.priority)}`}>{goal.priority}</span></p>
                   <p>Finish Date: {format(new Date(goal.finishDate), 'yyyy-MM-dd')}</p>
                   <p>Days: {getWeekDaysString(goal.weekDays!)}</p>
                   <p>Progress: {goal.completedAttempts || 0}/{goal.goalSuccess} successes</p>
@@ -102,17 +115,4 @@ export default function RecentGoals() {
       </CardContent>
     </Card>
   );
-}
-
-function getPriorityColor(priority: GoalPriority) {
-  switch (priority) {
-    case GoalPriority.LOW:
-      return "text-blue-500";
-    case GoalPriority.MEDIUM:
-      return "text-yellow-500";
-    case GoalPriority.HIGH:
-      return "text-red-500";
-    default:
-      return "";
-  }
 }

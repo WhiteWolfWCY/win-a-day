@@ -14,11 +14,11 @@ export default function DashboardLayout({
   return (
     <>
       <QueryClientProvider>
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col relative overflow-hidden z-0">
+        <div className="min-h-screen bg-gradient-custom flex flex-col relative overflow-hidden z-0">
           {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute rounded-full bg-yellow-200 opacity-20 z-0"
+              className="absolute rounded-full floating-element"
               style={{
                 width: Math.random() * 100 + 50,
                 height: Math.random() * 100 + 50,

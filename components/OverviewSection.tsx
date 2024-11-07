@@ -61,7 +61,7 @@ export default function OverviewSection() {
   });
 
   return (
-    <Card className="bg-white bg-opacity-80 backdrop-blur-sm">
+    <Card className="bg-opacity-80 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">Overview</CardTitle>
       </CardHeader>
