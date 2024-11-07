@@ -35,7 +35,7 @@ export default function Leaderboard() {
                 <div className={`flex items-center justify-between p-3 sm:p-4 rounded-lg bg-background/50 ${
                   index < 3 ? "border border-yellow-500/20" : ""
                 } hover:bg-background/70 transition-colors mb-2`}>
-                  {/* Left side with rank, avatar, and name */}
+                  {/* Left side with rank, avatar, and name of user*/}
                   <div className="flex items-center gap-2 sm:gap-4">
                     <span className="text-lg sm:text-xl font-bold min-w-[1.5rem] sm:min-w-[2rem]">
                       {index < 3 ? medals[index] : index + 1}
