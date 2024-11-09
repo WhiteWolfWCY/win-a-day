@@ -1,10 +1,23 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import createMiddleware from 'next-intl/middleware';
+import { NextResponse } from 'next/server';
+
+// Create the locale middleware
+const intlMiddleware = createMiddleware({
+  locales: ['en', 'pl'],
+  defaultLocale: 'en'
+});
 
 const isProtectedRoute = createRouteMatcher(['/dashboard(.*)'])
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect()
-})
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) {
+    auth.protect();
+  }
+  
+  // Handle locales after auth check
+  return intlMiddleware(req);
+});
 
 export const config = {
   matcher: [

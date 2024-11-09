@@ -2,6 +2,7 @@ import { Card } from "./ui/card";
 import { Trophy, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { AchievementCategory } from "@/db/schema";
+import { useTranslations } from 'next-intl';
 
 type AchievementProps = {
   name: string;
@@ -26,6 +27,8 @@ export function Achievement({
   isUnlocked,
   unlockedAt
 }: AchievementProps) {
+  const t = useTranslations('achievements');
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -68,17 +71,21 @@ export function Achievement({
           {isUnlocked ? (
             <>
               <p className="text-sm text-yellow-500">
-                Unlocked! +{xpReward} XP
+                {t('unlocked', { xp: xpReward })}
               </p>
               {unlockedAt && (
                 <p className="text-xs text-muted-foreground">
-                  Achieved on {unlockedAt.toLocaleDateString()}
+                  {t('achievedOn', { 
+                    date: unlockedAt.toLocaleDateString(undefined, { 
+                      dateStyle: 'medium' 
+                    })
+                  })}
                 </p>
               )}
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Progress: {progress}/{requirement}
+              {t('progress', { current: progress, total: requirement })}
             </p>
           )}
         </TooltipContent>

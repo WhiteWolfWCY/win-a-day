@@ -1,0 +1,390 @@
+{
+  "common": {
+    "theme": "Motyw",
+    "light": "Jasny",
+    "dark": "Ciemny",
+    "system": "Systemowy",
+    "chooseTheme": "Wybierz preferowany motyw",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "loading": "Ładowanie...",
+    "diveIn": "Rozpocznij",
+    "error": "Błąd",
+    "saving": "Zapisywanie...",
+    "openMenu": "Otwórz menu",
+    "confirm": "Potwierdź",
+    "anonymous": "Anonimowy",
+    "previousPage": "Poprzednia strona",
+    "nextPage": "Następna strona",
+    "user": "Użytkownik",
+    "notAvailable": "Brak",
+    "back": "Wstecz"
+  },
+  "auth": {
+    "signIn": "Zaloguj się",
+    "signOut": "Wyloguj się"
+  },
+  "navigation": {
+    "home": "Strona główna",
+    "dashboard": "Panel",
+    "habits": "Nawyki",
+    "goals": "Cele",
+    "community": "Społeczność",
+    "analytics": "Analityka",
+    "settings": "Ustawienia",
+    "toggleMenu": "Przełącz menu",
+    "closeMenu": "Zamknij menu"
+  },
+  "habits": {
+    "title": "Wszystkie Nawyki",
+    "addHabit": "Dodaj Nawyk",
+    "searchPlaceholder": "Szukaj nawyków...",
+    "noHabitsFound": "Nie znaleziono nawyków",
+    "goodHabit": "Dobry Nawyk",
+    "badHabit": "Zły Nawyk",
+    "table": {
+      "name": "Nazwa",
+      "category": "Kategoria",
+      "isGoodHabit": "Dobry Nawyk?",
+      "actions": "Akcje"
+    }
+  },
+  "goals": {
+    "title": "Wszystkie Cele",
+    "addGoal": "Dodaj Cel",
+    "editGoal": "Edytuj Cel",
+    "searchPlaceholder": "Szukaj celów...",
+    "noGoalsFound": "Nie znaleziono celów",
+    "dateFormat": "dd.MM.yyyy",
+    "name": "Nazwa",
+    "namePlaceholder": "Wprowadź nazwę celu",
+    "habit": "Nawyk",
+    "selectHabit": "Wybierz nawyk",
+    "noHabits": "Nie znaleziono nawyków",
+    "priority": {
+      "title": "Priorytet",
+      "select": "Wybierz priorytet",
+      "low": "Niski",
+      "medium": "Średni",
+      "high": "Wysoki"
+    },
+    "startDate": "Data Rozpoczęcia",
+    "finishDate": "Data Zakończenia",
+    "pickDate": "Wybierz datę",
+    "goalSuccess": "Cel Sukcesu",
+    "weekDays": "Dni Tygodnia",
+    "addButton": "Dodaj Cel",
+    "updateButton": "Aktualizuj Cel",
+    "createSuccess": "Cel utworzony",
+    "createSuccessDesc": "Twój cel został pomyślnie utworzony.",
+    "createError": "Nie udało się utworzyć celu. Spróbuj ponownie.",
+    "updateSuccess": "Cel zaktualizowany",
+    "updateSuccessDesc": "Twój cel został pomyślnie zaktualizowany.",
+    "updateError": "Nie udało się zaktualizować celu. Spróbuj ponownie.",
+    "deleteTitle": "Usuń Cel",
+    "deleteConfirm": "Czy na pewno chcesz usunąć cel \"{name}\"? Tej akcji nie można cofnąć.",
+    "deleteSuccess": "Cel usunięty",
+    "deleteSuccessDesc": "Cel został pomyślnie usunięty.",
+    "deleteError": "Nie udało się usunąć celu. Spróbuj ponownie.",
+    "progress": "{completed}/{total} sukcesów",
+    "table": {
+      "name": "Nazwa",
+      "priority": "Priorytet",
+      "finishDate": "Data Zakończenia",
+      "days": "Dni",
+      "progress": "Postęp",
+      "status": "Status",
+      "actions": "Akcje"
+    },
+    "status": {
+      "completed": "Ukończony",
+      "inProgress": "W Trakcie"
+    },
+    "priorities": {
+      "low": "Niski",
+      "medium": "Średni",
+      "high": "Wysoki"
+    },
+    "days": {
+      "monday": "Poniedziałek",
+      "tuesday": "Wtorek",
+      "wednesday": "Środa",
+      "thursday": "Czwartek",
+      "friday": "Piątek",
+      "saturday": "Sobota",
+      "sunday": "Niedziela"
+    },
+    "daysShortcut": {
+      "mon": "Pon",
+      "tue": "Wt",
+      "wed": "Śr",
+      "thu": "Czw",
+      "fri": "Pt",
+      "sat": "Sob",
+      "sun": "Ndz"
+    }
+  },
+  "settings": {
+    "userSettings": "Ustawienia Użytkownika",
+    "fullName": "Imię i Nazwisko",
+    "email": "Email",
+    "memberSince": "Data Dołączenia",
+    "dateFormat": "d MMMM yyyy",
+    "achievements": "Osiągnięcia",
+    "appearance": {
+      "title": "Wygląd",
+      "theme": "Motyw",
+      "themeDesc": "Wybierz preferowany tryb motywu"
+    },
+    "notifications": {
+      "title": "Powiadomienia",
+      "enable": "Włącz Powiadomienia",
+      "enableDesc": "Otrzymuj powiadomienia o swoich postępach",
+      "email": "Powiadomienia Email",
+      "emailDesc": "Otrzymuj powiadomienia przez email",
+      "types": "Typy Powiadomień",
+      "achievements": "Odblokowane Osiągnięcia",
+      "goalCompletions": "Ukończone Cele",
+      "goalUpdates": "Aktualizacje Celów",
+      "habitUpdates": "Aktualizacje Nawyków",
+      "reminderSettings": "Ustawienia Przypomnień",
+      "frequency": "Częstotliwość",
+      "selectFrequency": "Wybierz częstotliwość",
+      "reminderTime": "Czas Przypomnienia",
+      "updateSuccess": "Ustawienia zaktualizowane",
+      "updateSuccessDesc": "Twoje preferencje powiadomień zostały zapisane.",
+      "frequencies": {
+        "daily": "Codziennie",
+        "weekly": "Tygodniowo",
+        "monthly": "Miesięcznie"
+      }
+    },
+    "categories": {
+      "manageTitle": "Zarządzaj Kategoriami",
+      "addTitle": "Dodaj Kategorię",
+      "editTitle": "Edytuj Kategorię",
+      "addButton": "Dodaj Kategorię",
+      "editButton": "Edytuj Kategorię",
+      "searchPlaceholder": "Szukaj kategorii...",
+      "noCategories": "Nie znaleziono kategorii",
+      "deleteConfirm": "Czy na pewno chcesz usunąć kategorię \"{name}\"? Tej akcji nie można cofnąć.",
+      "deleteSuccess": "Kategoria usunięta",
+      "deleteSuccessDesc": "Kategoria została pomyślnie usunięta.",
+      "deleteError": "Nie udało się usunąć kategorii. Spróbuj ponownie.",
+      "createSuccess": "Kategoria utworzona",
+      "createSuccessDesc": "Twoja nowa kategoria została pomyślnie dodana.",
+      "createError": "Nie udało się utworzyć kategorii. Spróbuj ponownie.",
+      "updateSuccess": "Kategoria zaktualizowana",
+      "updateSuccessDesc": "Twoja kategoria została pomyślnie zaktualizowana.",
+      "updateError": "Nie udało się zaktualizować kategorii. Spróbuj ponownie.",
+      "name": "Nazwa Kategorii",
+      "namePlaceholder": "Wprowadź nazwę kategorii",
+      "icon": "Ikona",
+      "selectIcon": "Wybierz ikonę"
+    }
+  },
+  "landing": {
+    "title": "Śledź swoje nawyki. Zmień swoje życie.",
+    "subtitle": "Śledź, poprawiaj i świętuj swoje codzienne nawyki z naszą intuicyjną aplikacją. Zamień rutynę w zwycięstwa!",
+    "startJourney": "Rozpocznij Podróż",
+    "whyChoose": "Dlaczego Win a Day?",
+    "features": {
+      "trackGoodHabits": {
+        "title": "Śledź Dobre Nawyki",
+        "description": "Ustal i monitoruj pozytywne nawyki, aby poprawić swoją codzienną rutynę."
+      },
+      "breakBadHabits": {
+        "title": "Przełam Złe Nawyki",
+        "description": "Zidentyfikuj i pracuj nad przełamaniem negatywnych nawyków, które Cię powstrzymują."
+      },
+      "visualizeProgress": {
+        "title": "Wizualizuj Postępy",
+        "description": "Zobacz swój postęp w czasie dzięki intuicyjnym wykresom i statystykom."
+      }
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "title": "Przegląd",
+      "goalCompletion": "Realizacja Celów",
+      "habitAdherence": "Przestrzeganie Nawyków (Ostatnie 14 dni)",
+      "habitCategories": "Kategorie Nawyków",
+      "habitBalance": "Bilans Nawyków",
+      "goodHabits": "Dobre Nawyki",
+      "badHabits": "Złe Nawyki",
+      "completionRate": "Wskaźnik Ukończenia",
+      "charts": {
+        "dateFormat": "dd.MM",
+        "dateFormatLong": "dd.MM.yyyy",
+        "goalCompletion": {
+          "title": "Realizacja Celów",
+          "completed": "Ukończone",
+          "remaining": "Pozostałe",
+          "goals": "celów"
+        },
+        "habitAdherence": {
+          "title": "Przestrzeganie Nawyków",
+          "goodHabits": "Dobre Nawyki",
+          "badHabits": "Złe Nawyki",
+          "percentage": "Wskaźnik przestrzegania"
+        }
+      }
+    },
+    "newestHabits": {
+      "title": "Najnowsze Nawyki",
+      "noHabits": "Brak nawyków. Zacznij tworzyć!",
+      "viewAll": "Zobacz Wszystkie",
+      "category": "Kategoria",
+      "habitType": "Typ",
+      "goodHabit": "Dobry nawyk",
+      "badHabit": "Zły nawyk"
+    },
+    "recentGoals": {
+      "title": "Ostatnie Cele",
+      "noGoals": "Brak celów. Zacznij je ustalać!",
+      "viewAll": "Zobacz Wszystkie",
+      "dueDate": "Termin",
+      "habit": "Nawyk",
+      "priority": "Priorytet",
+      "finishDate": "Data Zakończenia",
+      "days": "Dni",
+      "progress": "Postęp",
+      "completed": "Ukończone",
+      "successes": "sukcesów"
+    },
+    "goalsForDays": {
+      "title": "Cele na Dni",
+      "goalsFor": "Cele na",
+      "noGoals": "Brak celów na ten dzień",
+      "addEditNote": "Dodaj/Edytuj Notatkę",
+      "enterNote": "Wpisz swoją notatkę tutaj...",
+      "saving": "Zapisywanie...",
+      "saveNote": "Zapisz Notatkę"
+    }
+  },
+  "achievements": {
+    "unlocked": "Odblokowano! +{xp} XP",
+    "achievedOn": "Osiągnięto {date}",
+    "progress": "Postęp: {current}/{total}",
+    "yourAchievements": "Twoje Osiągnięcia",
+    "noAchievements": "Brak odblokowanych osiągnięć",
+    "unlockedOn": "Odblokowano {date}",
+    "title": "Osiągnięcia",
+    "completed": "Osiągnięcie Ukończone!",
+    "progressCount": "Postęp: {current}/{total}",
+    "categories": {
+      "habits": "Nawyki",
+      "goals": "Cele",
+      "streaks": "Serie",
+      "social": "Społeczność"
+    }
+  },
+  "leaderboard": {
+    "title": "Tablica Wyników",
+    "totalHabits": "Utworzone Nawyki",
+    "goalsCompleted": "Ukończone Cele",
+    "achievementsUnlocked": "Odblokowane Osiągnięcia",
+    "currentStreak": "Aktualna Seria Dzienna",
+    "totalScoreDesc": "Całkowity Wynik (z bonusem za serię)",
+    "points": "punktów"
+  },
+  "theme": {
+    "toggle": "Przełącz motyw",
+    "updateSuccess": "Motyw zaktualizowany",
+    "updateSuccessDesc": "Motyw aplikacji został zmieniony na tryb {theme}.",
+    "modes": {
+      "light": "Jasny",
+      "dark": "Ciemny",
+      "system": "Systemowy"
+    }
+  },
+  "analytics": {
+    "title": "Twoje Statystyki",
+    "dateRange": {
+      "title": "Wybierz Zakres Dat",
+      "from": "Od",
+      "to": "Do",
+      "pickDate": "Wybierz datę"
+    },
+    "cards": {
+      "totalHabits": "Wszystkie Nawyki",
+      "goodHabitCompletion": "Realizacja Dobrych Nawyków",
+      "badHabitAvoidance": "Unikanie Złych Nawyków",
+      "categories": "Kategorie",
+      "goodHabitsPercentage": "{percentage}% Dobrych",
+      "habitsCount": "{count} Nawyków"
+    },
+    "charts": {
+      "dateFormat": {
+        "short": "dd MMM",
+        "long": "dd MMM yyyy"
+      },
+      "habitStreaks": {
+        "title": "Serie Nawyków",
+        "currentStreak": "Aktualna Seria",
+        "maxStreak": "Najdłuższa Seria"
+      },
+      "goalCompletion": {
+        "title": "Stopień Realizacji Celów w Czasie",
+        "rate": "Stopień Realizacji"
+      },
+      "habitBalance": {
+        "title": "Bilans Nawyków",
+        "goodHabits": "Dobre Nawyki",
+        "badHabits": "Złe Nawyki",
+        "habits": "nawyki",
+        "habit": "nawyk",
+        "total": "Łącznie"
+      },
+      "habitCategories": {
+        "title": "Kategorie Nawyków",
+        "total": "Łącznie",
+        "noCategory": "Bez Kategorii"
+      }
+    }
+  },
+  "profile": {
+    "title": "Profil użytkownika {name}",
+    "memberSince": "Dołączył(a) {date}",
+    "backToLeaderboard": "Powrót do Rankingu",
+    "error": {
+      "loading": "Błąd podczas ładowania profilu. Spróbuj ponownie później.",
+      "notFound": "Nie znaleziono użytkownika."
+    },
+    "stats": {
+      "totalHabits": "Wszystkie Nawyki",
+      "habitsDesc": "Utworzone nawyki",
+      "completedGoals": "Ukończone Cele",
+      "goalsDesc": "Łącznie ukończonych",
+      "currentStreak": "Aktualna Seria",
+      "daysDesc": "Dni",
+      "totalScore": "Wynik Całkowity",
+      "pointsDesc": "Punktów"
+    },
+    "achievements": {
+      "title": "Osiągnięcia",
+      "count": "({unlocked}/{total})"
+    },
+    "statistics": {
+      "title": "Statystyki",
+      "habitDistribution": "Rozkład Nawyków",
+      "categoryDistribution": "Rozkład Kategorii",
+      "goalCompletionTrend": "Trend Realizacji Celów"
+    },
+    "charts": {
+      "habit": "nawyk",
+      "habits": "nawyków",
+      "dateFormat": "dd MMM",
+      "noCategory": "Bez Kategorii",
+      "habitBalance": {
+        "goodHabits": "Dobre Nawyki",
+        "badHabits": "Złe Nawyki"
+      },
+      "goalCompletion": {
+        "rate": "Stopień Realizacji"
+      }
+    }
+  }
+} 

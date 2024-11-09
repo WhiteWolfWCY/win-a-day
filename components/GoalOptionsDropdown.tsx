@@ -10,6 +10,7 @@ import { deleteGoal } from "@/actions/actions";
 import { toast } from "@/hooks/use-toast";
 import { ConfirmationDialog } from "./ConfirmationDialog";
 import { GoalPriority, WeekDays } from "@/db/schema";
+import { useTranslations } from 'next-intl';
 
 interface GoalMenuProps {
   goalId: string;
@@ -23,6 +24,7 @@ interface GoalMenuProps {
 }
 
 export default function GoalMenu({ goalId, goalName, habitId, priority, startDate, finishDate, goalSuccess, weekDays }: GoalMenuProps) {
+  const t = useTranslations();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -33,15 +35,15 @@ export default function GoalMenu({ goalId, goalName, habitId, priority, startDat
       queryClient.invalidateQueries({ queryKey: ["recent-goals"] });
       queryClient.invalidateQueries({ queryKey: ["user-goals"] });
       toast({
-        title: "Goal deleted",
-        description: "The goal has been successfully deleted.",
+        title: t('goals.deleteSuccess'),
+        description: t('goals.deleteSuccessDesc'),
       });
       setIsDeleteDialogOpen(false);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to delete goal. Please try again.",
+        title: t('common.error'),
+        description: t('goals.deleteError'),
         variant: "destructive",
       });
       console.error("Failed to delete goal:", error);
@@ -57,18 +59,18 @@ export default function GoalMenu({ goalId, goalName, habitId, priority, startDat
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('common.openMenu')}</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
-            Edit
+            {t('common.edit')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete
+            {t('common.delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -90,10 +92,10 @@ export default function GoalMenu({ goalId, goalName, habitId, priority, startDat
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDelete}
-        title="Delete Goal"
-        description={`Are you sure you want to delete the goal "${goalName}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('goals.deleteTitle')}
+        description={t('goals.deleteConfirm', { name: goalName })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         isLoading={deleteGoalMutation.isPending}
       />
     </>

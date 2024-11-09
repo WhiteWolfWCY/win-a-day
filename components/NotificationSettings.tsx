@@ -11,6 +11,7 @@ import { NotificationFrequency } from "@/db/schema";
 import { TimePickerInput } from "./ui/time-picker";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { useTranslations } from 'next-intl';
 
 type NotificationSettings = {
   id: string;
@@ -28,6 +29,7 @@ type NotificationSettings = {
 };
 
 export default function NotificationSettings() {
+  const t = useTranslations();
   const { userId } = useAuth();
   const queryClient = useQueryClient();
   const [reminderTime, setReminderTime] = useState<Date | undefined>(undefined);
@@ -44,8 +46,8 @@ export default function NotificationSettings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notification-settings"] });
       toast({
-        title: "Settings updated",
-        description: "Your notification preferences have been saved.",
+        title: t('settings.notifications.updateSuccess'),
+        description: t('settings.notifications.updateSuccessDesc'),
       });
     },
   });
@@ -70,15 +72,15 @@ export default function NotificationSettings() {
   return (
     <Card className="bg-card backdrop-blur-sm">
       <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">Notifications</CardTitle>
+        <CardTitle className="text-2xl font-bold">{t('settings.notifications.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Enable Notifications</Label>
+              <Label>{t('settings.notifications.enable')}</Label>
               <p className="text-sm text-muted-foreground">
-                Receive notifications about your progress
+                {t('settings.notifications.enableDesc')}
               </p>
             </div>
             <Switch
@@ -89,9 +91,9 @@ export default function NotificationSettings() {
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Email Notifications</Label>
+              <Label>{t('settings.notifications.email')}</Label>
               <p className="text-sm text-muted-foreground">
-                Receive notifications via email
+                {t('settings.notifications.emailDesc')}
               </p>
             </div>
             <Switch
@@ -103,10 +105,10 @@ export default function NotificationSettings() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-medium">Notification Types</h3>
+          <h3 className="font-medium">{t('settings.notifications.types')}</h3>
           
           <div className="flex items-center justify-between">
-            <Label>Achievement Unlocks</Label>
+            <Label>{t('settings.notifications.achievements')}</Label>
             <Switch
               checked={settings?.achievementNotifications || false}
               onCheckedChange={handleToggle("achievementNotifications")}
@@ -115,7 +117,7 @@ export default function NotificationSettings() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label>Goal Completions</Label>
+            <Label>{t('settings.notifications.goalCompletions')}</Label>
             <Switch
               checked={settings?.goalCompletionNotifications || false}
               onCheckedChange={handleToggle("goalCompletionNotifications")}
@@ -124,7 +126,7 @@ export default function NotificationSettings() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label>Goal Updates</Label>
+            <Label>{t('settings.notifications.goalUpdates')}</Label>
             <Switch
               checked={settings?.goalUpdatesNotifications || false}
               onCheckedChange={handleToggle("goalUpdatesNotifications")}
@@ -133,7 +135,7 @@ export default function NotificationSettings() {
           </div>
 
           <div className="flex items-center justify-between">
-            <Label>Habit Updates</Label>
+            <Label>{t('settings.notifications.habitUpdates')}</Label>
             <Switch
               checked={settings?.habitUpdatesNotifications || false}
               onCheckedChange={handleToggle("habitUpdatesNotifications")}
@@ -143,22 +145,22 @@ export default function NotificationSettings() {
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-medium">Reminder Settings</h3>
+          <h3 className="font-medium">{t('settings.notifications.reminderSettings')}</h3>
           
           <div className="space-y-2">
-            <Label>Frequency</Label>
+            <Label>{t('settings.notifications.frequency')}</Label>
             <Select
               value={settings?.reminderFrequency || NotificationFrequency.DAILY}
               onValueChange={handleFrequencyChange}
               disabled={!settings?.notificationsEnabled}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select frequency" />
+                <SelectValue placeholder={t('settings.notifications.selectFrequency')} />
               </SelectTrigger>
               <SelectContent>
                 {Object.values(NotificationFrequency).map((frequency) => (
                   <SelectItem key={frequency} value={frequency}>
-                    {frequency}
+                    {t(`settings.notifications.frequencies.${frequency.toLowerCase()}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -166,7 +168,7 @@ export default function NotificationSettings() {
           </div>
 
           <div className="space-y-2">
-            <Label>Reminder Time</Label>
+            <Label>{t('settings.notifications.reminderTime')}</Label>
             <TimePickerInput
               value={reminderTime || (settings?.reminderTime ? new Date(settings.reminderTime) : undefined)}
               onChange={handleTimeChange}

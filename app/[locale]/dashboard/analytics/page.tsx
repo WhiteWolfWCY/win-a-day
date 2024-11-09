@@ -41,6 +41,7 @@ import {
 import { format, subDays, isBefore, startOfDay } from "date-fns";
 import { CalendarIcon, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import Loader from "@/components/Loader";
+import { useTranslations } from 'next-intl';
 
 const COLORS = ["#fbbf24", "#fcd34d", "#fde68a", "#fef3c7", "#fffbeb"];
 
@@ -50,6 +51,7 @@ export default function AnalyticsPage() {
     from: subDays(new Date(), 30),
     to: new Date(),
   });
+  const t = useTranslations();
 
   const { data: habitStreaks, isLoading: isLoadingStreaks } = useQuery({
     queryKey: ["habit-streaks", userId, dateRange.from, dateRange.to],
@@ -81,17 +83,17 @@ export default function AnalyticsPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Your Analytics</h1>
+      <h1 className="text-3xl font-bold mb-6">{t('analytics.title')}</h1>
 
       {/* Date range picker */}
       <Card>
         <CardHeader>
-          <CardTitle>Select Date Range</CardTitle>
+          <CardTitle>{t('analytics.dateRange.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="from">From</Label>
+              <Label htmlFor="from">{t('analytics.dateRange.from')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -105,7 +107,7 @@ export default function AnalyticsPage() {
                     {dateRange.from ? (
                       format(dateRange.from, "PPP")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>{t('analytics.dateRange.pickDate')}</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -125,7 +127,7 @@ export default function AnalyticsPage() {
               </Popover>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="to">To</Label>
+              <Label htmlFor="to">{t('analytics.dateRange.to')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -139,7 +141,7 @@ export default function AnalyticsPage() {
                     {dateRange.to ? (
                       format(dateRange.to, "PPP")
                     ) : (
-                      <span>Pick a date</span>
+                      <span>{t('analytics.dateRange.pickDate')}</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -168,73 +170,32 @@ export default function AnalyticsPage() {
         <>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <OverviewCard
-              title="Total Habits"
-              value={
-                habitBalance
-                  ? (
-                      habitBalance.goodHabits + habitBalance.badHabits
-                    ).toString()
-                  : "-"
-              }
+              title={t('analytics.cards.totalHabits')}
+              value={habitBalance ? (habitBalance.goodHabits + habitBalance.badHabits).toString() : "-"}
               trend="up"
-              percentage={
-                habitBalance
-                  ? `${(
-                      (habitBalance.goodHabits /
-                        (habitBalance.goodHabits + habitBalance.badHabits)) *
-                      100
-                    ).toFixed(0)}% Good`
-                  : "-"
-              }
+              percentage={habitBalance ? t('analytics.cards.goodHabitsPercentage', {
+                percentage: ((habitBalance.goodHabits / (habitBalance.goodHabits + habitBalance.badHabits)) * 100).toFixed(0)
+              }) : "-"}
             />
             <OverviewCard
-              title="Good Habit Completion"
-              value={
-                habitBalance
-                  ? `${habitBalance.goodHabitCompletionRate.toFixed(0)}%`
-                  : "-"
-              }
-              trend={
-                habitBalance && habitBalance.goodHabitCompletionRate > 50
-                  ? "up"
-                  : "down"
-              }
-              percentage={`${
-                habitBalance ? habitBalance.goodHabits : "-"
-              } Habits`}
+              title={t('analytics.cards.goodHabitCompletion')}
+              value={habitBalance ? `${habitBalance.goodHabitCompletionRate.toFixed(0)}%` : "-"}
+              trend={habitBalance && habitBalance.goodHabitCompletionRate > 50 ? "up" : "down"}
+              percentage={t('analytics.cards.habitsCount', { count: habitBalance ? habitBalance.goodHabits : 0 })}
             />
             <OverviewCard
-              title="Bad Habit Avoidance"
-              value={
-                habitBalance
-                  ? `${(100 - habitBalance.badHabitCompletionRate).toFixed(0)}%`
-                  : "-"
-              }
-              trend={
-                habitBalance && habitBalance.badHabitCompletionRate < 50
-                  ? "up"
-                  : "down"
-              }
-              percentage={`${
-                habitBalance ? habitBalance.badHabits : "-"
-              } Habits`}
+              title={t('analytics.cards.badHabitAvoidance')}
+              value={habitBalance ? `${(100 - habitBalance.badHabitCompletionRate).toFixed(0)}%` : "-"}
+              trend={habitBalance && habitBalance.badHabitCompletionRate < 50 ? "up" : "down"}
+              percentage={t('analytics.cards.habitsCount', { count: habitBalance ? habitBalance.badHabits : 0 })}
             />
             <OverviewCard
-              title="Categories"
-              value={
-                categoryDistribution
-                  ? categoryDistribution.length.toString()
-                  : "-"
-              }
+              title={t('analytics.cards.categories')}
+              value={categoryDistribution ? categoryDistribution.length.toString() : "-"}
               trend="up"
-              percentage={
-                categoryDistribution
-                  ? `${categoryDistribution.reduce(
-                      (sum, cat) => sum + cat.habitCount,
-                      0
-                    )} Habits`
-                  : "-"
-              }
+              percentage={t('analytics.cards.habitsCount', {
+                count: categoryDistribution ? categoryDistribution.reduce((sum, cat) => sum + cat.habitCount, 0) : 0
+              })}
             />
           </div>
 
@@ -250,17 +211,13 @@ export default function AnalyticsPage() {
   );
 }
 
-function OverviewCard({
-  title,
-  value,
-  trend,
-  percentage,
-}: {
+function OverviewCard({ title, value, trend, percentage }: {
   title: string;
   value: string;
   trend: "up" | "down";
   percentage: string;
 }) {
+  const t = useTranslations();
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -273,39 +230,118 @@ function OverviewCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p
-          className={`text-xs ${
-            trend === "up" ? "text-green-500" : "text-red-500"
-          }`}
-        >
-          {percentage !== "N/A"
-            ? `${trend === "up" ? "+" : "-"}${percentage} completion`
-            : "N/A"}
+        <p className={`text-xs ${trend === "up" ? "text-green-500" : "text-red-500"}`}>
+          {percentage !== "N/A" ? percentage : t('common.notAvailable')}
         </p>
       </CardContent>
     </Card>
   );
 }
 
+// Custom tooltip for bar chart
+const CustomBarTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background/95 border rounded-lg shadow-lg p-2">
+        <p className="font-medium mb-1">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} style={{ color: entry.color }} className="text-sm">
+            {`${entry.name}: ${entry.value}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom tooltip for line chart
+const CustomLineTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-background/95 border rounded-lg shadow-lg p-2">
+        <p className="font-medium mb-1">{format(new Date(label), 'PPP')}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} style={{ color: entry.color }} className="text-sm">
+            {`${entry.name}: ${Number(entry.value).toFixed(1)}%`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+// Custom tooltip for pie chart
+const CustomPieTooltip = ({ active, payload }: any) => {
+  const t = useTranslations('analytics');
+  
+  if (active && payload && payload.length) {
+    const value = payload[0].value;
+    const percentage = payload[0].payload.percentage || 0;
+    const habitForm = value === 1 
+      ? t('charts.habitBalance.habit') 
+      : t('charts.habitBalance.habits');
+    
+    return (
+      <div className="bg-background/95 border rounded-lg shadow-lg p-2 text-sm">
+        <p className="font-medium">
+          {`${payload[0].name}: ${value} ${habitForm} (${percentage}%)`}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Add this with other custom tooltips
+const CustomCategoryTooltip = ({ active, payload }: any) => {
+  const t = useTranslations('analytics');
+  
+  if (active && payload && payload.length) {
+    const value = payload[0].value;
+    const total = payload[0].payload.total;
+    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+    const habitForm = value === 1 
+      ? t('charts.habitBalance.habit') 
+      : t('charts.habitBalance.habits');
+    
+    return (
+      <div className="bg-background/95 border rounded-lg shadow-lg p-2 text-sm">
+        <p className="font-medium">
+          {`${payload[0].name}: ${value} ${habitForm} (${percentage}%)`}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 function HabitStreaksChart({ data }: { data: any[] }) {
+  const t = useTranslations('analytics');
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Habit Streaks</CardTitle>
+        <CardTitle>{t('charts.habitStreaks.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart
-            data={data}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="habitName" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="currentStreak" fill="#fbbf24" name="Current Streak" />
-            <Bar dataKey="maxStreak" fill="#fcd34d" name="Max Streak" />
+          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <XAxis dataKey="habitName" className="text-foreground" />
+            <YAxis className="text-foreground" />
+            <Tooltip content={<CustomBarTooltip />} />
+            <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
+            <Bar 
+              dataKey="currentStreak" 
+              fill="#fbbf24" 
+              name={t('charts.habitStreaks.currentStreak')} 
+            />
+            <Bar 
+              dataKey="maxStreak" 
+              fill="#fcd34d" 
+              name={t('charts.habitStreaks.maxStreak')} 
+            />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
@@ -314,6 +350,7 @@ function HabitStreaksChart({ data }: { data: any[] }) {
 }
 
 function GoalCompletionRateChart({ data }: { data: any[] }) {
+  const t = useTranslations('analytics');
   const sortedData = [...data].sort((a, b) => 
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
@@ -321,7 +358,7 @@ function GoalCompletionRateChart({ data }: { data: any[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Goal Completion Rate Over Time</CardTitle>
+        <CardTitle>{t('charts.goalCompletion.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -329,28 +366,27 @@ function GoalCompletionRateChart({ data }: { data: any[] }) {
             data={sortedData}
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis
               dataKey="date"
-              tickFormatter={(date) => format(new Date(date), "MMM dd")}
+              tickFormatter={(date) => format(new Date(date), t('charts.dateFormat.short'))}
               interval="preserveStartEnd"
               minTickGap={30}
+              className="text-foreground"
             />
             <YAxis 
               domain={[0, 100]}
               tickFormatter={(value) => `${value}%`}
+              className="text-foreground"
             />
-            <Tooltip
-              labelFormatter={(date) => format(new Date(date as string), "MMM dd, yyyy")}
-              formatter={(value) => [`${Number(value).toFixed(1)}%`, "Completion Rate"]}
-            />
-            <Legend />
+            <Tooltip content={<CustomLineTooltip />} />
+            <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
             <Line
               type="monotone"
               dataKey="completionRate"
               stroke="#fbbf24"
               activeDot={{ r: 8 }}
-              name="Completion Rate"
+              name={t('charts.goalCompletion.rate')}
               dot={false}
             />
           </LineChart>
@@ -361,6 +397,7 @@ function GoalCompletionRateChart({ data }: { data: any[] }) {
 }
 
 function HabitCategoryChart({ data }: { data: CategoryDistribution[] }) {
+  const t = useTranslations('analytics');
   const totalHabits = data.reduce(
     (sum, category) => sum + category.habitCount,
     0
@@ -370,12 +407,13 @@ function HabitCategoryChart({ data }: { data: CategoryDistribution[] }) {
   const chartData = data.map((category) => ({
     name: category.categoryName,
     value: category.habitCount,
+    total: totalHabits // Add total to each data point for the tooltip
   }));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Habit Categories</CardTitle>
+        <CardTitle>{t('charts.habitCategories.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -399,20 +437,14 @@ function HabitCategoryChart({ data }: { data: CategoryDistribution[] }) {
                 />
               ))}
             </Pie>
-            <Tooltip
-              formatter={(value, name) => [
-                `${value} habits (${(
-                  (Number(value) / totalHabits) *
-                  100
-                ).toFixed(1)}%)`,
-                name,
-              ]}
-            />
-            <Legend />
+            <Tooltip content={<CustomCategoryTooltip />} />
+            <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
           </PieChart>
         </ResponsiveContainer>
-        <div className="mt-4 text-center text-sm text-gray-500">
-          Total Habits: {totalHabits}
+        <div className="mt-4 text-center text-sm text-muted-foreground">
+          {t('charts.habitCategories.total')}: {totalHabits} {totalHabits === 1 
+            ? t('charts.habitBalance.habits') 
+            : t('charts.habitBalance.habits')}
         </div>
       </CardContent>
     </Card>
@@ -420,40 +452,58 @@ function HabitCategoryChart({ data }: { data: CategoryDistribution[] }) {
 }
 
 function HabitBalanceChart({ data }: { data: any }) {
+  const t = useTranslations('analytics');
   const chartData = data
     ? [
-        { name: "Good Habits", value: data.goodHabits },
-        { name: "Bad Habits", value: data.badHabits },
+        { 
+          name: t('charts.habitBalance.goodHabits'), 
+          value: data.goodHabits || 0,
+        },
+        { 
+          name: t('charts.habitBalance.badHabits'), 
+          value: data.badHabits || 0,
+        },
       ]
     : [];
+
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  // Pre-calculate percentages
+  const dataWithPercentages = chartData.map(item => ({
+    ...item,
+    percentage: total > 0 ? ((item.value / total) * 100).toFixed(0) : 0
+  }));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Habit Balance</CardTitle>
+        <CardTitle>{t('charts.habitBalance.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
-              data={chartData}
+              data={dataWithPercentages}
               cx="50%"
               cy="50%"
               labelLine={false}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
-              label={({ name, percent }) =>
-                `${name} ${(percent * 100).toFixed(0)}%`
-              }
+              label={({ name, percentage }) => `${name} ${percentage}%`}
             >
               <Cell fill="#fbbf24" />
               <Cell fill="#fcd34d" />
             </Pie>
-            <Tooltip />
-            <Legend />
+            <Tooltip content={<CustomPieTooltip />} />
+            <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
           </PieChart>
         </ResponsiveContainer>
+        <div className="mt-4 text-center text-sm text-muted-foreground">
+          {t('charts.habitBalance.total')}: {total} {total === 1 
+            ? t('charts.habitBalance.habit') 
+            : t('charts.habitBalance.habits')}
+        </div>
       </CardContent>
     </Card>
   );

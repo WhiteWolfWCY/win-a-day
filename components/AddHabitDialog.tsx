@@ -35,6 +35,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
+import { useTranslations } from 'next-intl';
 
 const formSchema = z.object({
   name: z
@@ -64,6 +65,7 @@ export default function AddHabitDialog({
   initialValues,
   showAddButton,
 }: AddHabitDialogProps) {
+  const t = useTranslations();
   const { userId } = useAuth();
   const queryClient = useQueryClient();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -114,14 +116,14 @@ export default function AddHabitDialog({
       setIsDialogOpen(false);
       form.reset();
       toast({
-        title: "Habit created",
-        description: "Your new habit has been successfully added.",
+        title: t('habits.createSuccess'),
+        description: t('habits.createSuccessDesc'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to create habit. Please try again.",
+        title: t('common.error'),
+        description: t('habits.createError'),
         variant: "destructive",
       });
       console.error("Failed to create habit:", error);
@@ -146,14 +148,14 @@ export default function AddHabitDialog({
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setIsDialogOpen(false);
       toast({
-        title: "Habit updated",
-        description: "Your habit has been successfully updated.",
+        title: t('habits.updateSuccess'),
+        description: t('habits.updateSuccessDesc'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to update habit. Please try again.",
+        title: t('common.error'),
+        description: t('habits.updateError'),
         variant: "destructive",
       });
       console.error("Failed to update habit:", error);
@@ -184,13 +186,15 @@ export default function AddHabitDialog({
       {showAddButton && (
         <DialogTrigger asChild>
           <Button className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-white">
-            <Plus className="mr-2 h-4 w-4" /> Add Habit
+            <Plus className="mr-2 h-4 w-4" /> {t('habits.addHabit')}
           </Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{habitId ? "Edit Habit" : "Add New Habit"}</DialogTitle>
+          <DialogTitle>
+            {habitId ? t('habits.editHabit') : t('habits.addHabit')}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -199,9 +203,9 @@ export default function AddHabitDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('habits.habitName')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter habit name" {...field} />
+                    <Input placeholder={t('habits.habitNamePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -212,16 +216,16 @@ export default function AddHabitDialog({
               name="categoryId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Category</FormLabel>
+                  <FormLabel>{t('habits.category')}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder={t('habits.selectCategory')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {isCategoriesLoading ? (
-                        <SelectItem value="">Loading categories...</SelectItem>
+                        <SelectItem value="">{t('common.loading')}</SelectItem>
                       ) : categories && categories.length > 0 ? (
                         categories.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
@@ -229,7 +233,7 @@ export default function AddHabitDialog({
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="">No categories found</SelectItem>
+                        <SelectItem value="">{t('habits.noCategories')}</SelectItem>
                       )}
                     </SelectContent>
                   </Select>
@@ -243,9 +247,9 @@ export default function AddHabitDialog({
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Good Habit</FormLabel>
+                    <FormLabel className="text-base">{t('habits.isGoodHabit')}</FormLabel>
                     <FormDescription>
-                      Is this a good habit you want to build?
+                      {t('habits.isGoodHabitDesc')}
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -264,14 +268,16 @@ export default function AddHabitDialog({
                 createHabitMutation.isPending || updateHabitMutation.isPending
               }
             >
-              {createHabitMutation.isPending || updateHabitMutation.isPending
-                ? <>
+              {createHabitMutation.isPending || updateHabitMutation.isPending ? (
+                <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  {t('common.saving')}
                 </>
-                : habitId
-                ? "Update Habit"
-                : "Add Habit"}
+              ) : habitId ? (
+                t('habits.updateButton')
+              ) : (
+                t('habits.addButton')
+              )}
             </Button>
           </form>
         </Form>

@@ -20,6 +20,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format, parse } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Plus } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name must be 100 characters or less"),
@@ -36,9 +38,11 @@ interface GoalDialogProps {
   setIsDialogOpen: (isDialogOpen: boolean) => void;
   goalId?: string;
   initialValues?: z.infer<typeof formSchema>;
+  showAddButton?: boolean;
 }
 
-export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, initialValues }: GoalDialogProps) {
+export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, initialValues, showAddButton }: GoalDialogProps) {
+  const t = useTranslations();
   const { userId } = useAuth();
   const queryClient = useQueryClient();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -82,8 +86,8 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setIsDialogOpen(false);
       toast({
-        title: "Goal created",
-        description: "Your goal has been successfully created.",
+        title: t('goals.createSuccess'),
+        description: t('goals.createSuccessDesc'),
       });
       // Reset the form
       form.reset({
@@ -98,8 +102,8 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to create goal. Please try again.",
+        title: t('common.error'),
+        description: t('goals.createError'),
         variant: "destructive",
       });
       console.error("Failed to create goal:", error);
@@ -115,8 +119,8 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       setIsDialogOpen(false);
       toast({
-        title: "Goal updated",
-        description: "Your goal has been successfully updated.",
+        title: t('goals.updateSuccess'),
+        description: t('goals.updateSuccessDesc'),
       });
       // Reset the form
       form.reset({
@@ -131,8 +135,8 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to update goal. Please try again.",
+        title: t('common.error'),
+        description: t('goals.updateError'),
         variant: "destructive",
       });
       console.error("Failed to update goal:", error);
@@ -149,205 +153,216 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
   }
 
   return (
-    <Dialog 
-      open={isDialogOpen} 
-      onOpenChange={(open) => {
-        if (!open) {
-          form.reset({
-            name: "",
-            habitId: "",
-            priority: GoalPriority.MEDIUM,
-            startDate: new Date().toISOString().split('T')[0],
-            finishDate: "",
-            goalSuccess: 1,
-            weekDays: [],
-          });
-        }
-        setIsDialogOpen(open);
-      }}
-    >
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>{goalId ? "Edit Goal" : "Add New Goal"}</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter goal name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="habitId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Habit</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+    <>
+      {showAddButton && (
+        <Button
+          onClick={() => setIsDialogOpen(true)}
+          className="w-full mt-4 bg-yellow-500 hover:bg-yellow-600 text-white"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {t('goals.addGoal')}
+        </Button>
+      )}
+      <Dialog 
+        open={isDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            form.reset({
+              name: "",
+              habitId: "",
+              priority: GoalPriority.MEDIUM,
+              startDate: new Date().toISOString().split('T')[0],
+              finishDate: "",
+              goalSuccess: 1,
+              weekDays: [],
+            });
+          }
+          setIsDialogOpen(open);
+        }}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {goalId ? t('goals.editGoal') : t('goals.addGoal')}
+            </DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('goals.name')}</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a habit" />
-                      </SelectTrigger>
+                      <Input placeholder={t('goals.namePlaceholder')} {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {isHabitsLoading ? (
-                        <SelectItem value="loading">Loading habits...</SelectItem>
-                      ) : habits && habits.length > 0 ? (
-                        habits.map((habit) => (
-                          <SelectItem key={habit.id} value={habit.id}>
-                            {habit.name}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="habitId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('goals.habit')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('goals.selectHabit')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {isHabitsLoading ? (
+                          <SelectItem value="loading">{t('common.loading')}</SelectItem>
+                        ) : habits && habits.length > 0 ? (
+                          habits.map((habit) => (
+                            <SelectItem key={habit.id} value={habit.id}>
+                              {habit.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-habits">{t('goals.noHabits')}</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('goals.priority.title')}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('goals.priority.select')} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(GoalPriority).map((priority) => (
+                          <SelectItem key={priority} value={priority}>
+                            {t(`goals.priority.${priority.toLowerCase()}`)}
                           </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-habits">No habits found</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Priority</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t('goals.startDate')}</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(parse(field.value, "yyyy-MM-dd", new Date()), "yyyy-MM-dd")
+                            ) : (
+                              <span>{t('goals.pickDate')}</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? parse(field.value, "yyyy-MM-dd", new Date()) : undefined}
+                          onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                          disabled={(date) =>
+                            date < new Date() || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="finishDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Finish Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(parse(field.value, "yyyy-MM-dd", new Date()), "yyyy-MM-dd")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value ? parse(field.value, "yyyy-MM-dd", new Date()) : undefined}
+                          onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                          disabled={(date) =>
+                            date < parse(form.getValues("startDate"), "yyyy-MM-dd", new Date()) || date < new Date("1900-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="goalSuccess"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('goals.goalSuccess')}</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
+                      <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
                     </FormControl>
-                    <SelectContent>
-                      {Object.values(GoalPriority).map((priority) => (
-                        <SelectItem key={priority} value={priority}>
-                          {priority}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="startDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Start Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(parse(field.value, "yyyy-MM-dd", new Date()), "yyyy-MM-dd")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? parse(field.value, "yyyy-MM-dd", new Date()) : undefined}
-                        onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
-                        disabled={(date) =>
-                          date < new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="finishDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Finish Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(parse(field.value, "yyyy-MM-dd", new Date()), "yyyy-MM-dd")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? parse(field.value, "yyyy-MM-dd", new Date()) : undefined}
-                        onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
-                        disabled={(date) =>
-                          date < parse(form.getValues("startDate"), "yyyy-MM-dd", new Date()) || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="goalSuccess"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Goal Success</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="weekDays"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Week Days</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.values(WeekDays).map((day) => (
-                      <FormField
-                        key={day}
-                        control={form.control}
-                        name="weekDays"
-                        render={({ field }) => {
-                          return (
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="weekDays"
+                render={() => (
+                  <FormItem>
+                    <FormLabel>{t('goals.weekDays')}</FormLabel>
+                    <div className="flex flex-wrap gap-2">
+                      {Object.values(WeekDays).map((day) => (
+                        <FormField
+                          key={day}
+                          control={form.control}
+                          name="weekDays"
+                          render={({ field }) => (
                             <FormItem
                               key={day}
                               className="flex flex-row items-start space-x-3 space-y-0"
@@ -367,32 +382,32 @@ export default function GoalDialog({ isDialogOpen, setIsDialogOpen, goalId, init
                                 />
                               </FormControl>
                               <FormLabel className="font-normal">
-                                {day}
+                                {t(`goals.days.${day.toLowerCase()}`)}
                               </FormLabel>
                             </FormItem>
-                          )
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={createGoalMutation.isPending || updateGoalMutation.isPending}
-            >
-              {createGoalMutation.isPending || updateGoalMutation.isPending
-                ? "Saving..."
-                : goalId
-                ? "Update Goal"
-                : "Add Goal"}
-            </Button>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={createGoalMutation.isPending || updateGoalMutation.isPending}
+              >
+                {createGoalMutation.isPending || updateGoalMutation.isPending
+                  ? t('common.saving')
+                  : goalId
+                  ? t('goals.updateButton')
+                  : t('goals.addButton')}
+              </Button>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

@@ -1,21 +1,24 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { CategoryDistribution } from "@/actions/actions";
+import { useTranslations } from 'next-intl';
+import { CustomPieTooltip, CustomLineTooltip } from './tooltips';
+import { format } from 'date-fns';
 
 const COLORS = ["#fbbf24", "#fcd34d", "#fde68a", "#fef3c7", "#fffbeb"];
 
 export function HabitCategoryChart({ data }: { data: CategoryDistribution[] }) {
+  const t = useTranslations('profile');
   const totalHabits = data.reduce((sum, category) => sum + category.habitCount, 0);
+
   const chartData = data.map((category) => ({
-    name: category.categoryName,
+    name: category.categoryName || t('charts.noCategory'),
     value: category.habitCount,
+    total: totalHabits
   }));
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Habit Categories</CardTitle>
-      </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
@@ -27,16 +30,14 @@ export function HabitCategoryChart({ data }: { data: CategoryDistribution[] }) {
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
-              label={({ name, percent }) =>
-                `${name} (${(percent * 100).toFixed(0)}%)`
-              }
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
             >
-              {chartData.map((entry, index) => (
+              {chartData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
-            <Legend />
+            <Tooltip content={<CustomPieTooltip />} />
+            <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>
@@ -45,18 +46,24 @@ export function HabitCategoryChart({ data }: { data: CategoryDistribution[] }) {
 }
 
 export function HabitBalanceChart({ data }: { data: any }) {
+  const t = useTranslations('profile');
   const chartData = data
     ? [
-        { name: "Good Habits", value: data.goodHabits },
-        { name: "Bad Habits", value: data.badHabits },
+        { 
+          name: t('charts.habitBalance.goodHabits'), 
+          value: data.goodHabits || 0,
+          total: (data.goodHabits || 0) + (data.badHabits || 0)
+        },
+        { 
+          name: t('charts.habitBalance.badHabits'), 
+          value: data.badHabits || 0,
+          total: (data.goodHabits || 0) + (data.badHabits || 0)
+        },
       ]
     : [];
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Habit Balance</CardTitle>
-      </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
@@ -68,15 +75,13 @@ export function HabitBalanceChart({ data }: { data: any }) {
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
-              label={({ name, percent }) =>
-                `${name} (${(percent * 100).toFixed(0)}%)`
-              }
+              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
             >
-              <Cell fill="#22c55e" />
-              <Cell fill="#ef4444" />
+              <Cell fill="#fbbf24" />
+              <Cell fill="#fcd34d" />
             </Pie>
-            <Tooltip />
-            <Legend />
+            <Tooltip content={<CustomPieTooltip />} />
+            <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>
@@ -85,24 +90,32 @@ export function HabitBalanceChart({ data }: { data: any }) {
 }
 
 export function GoalCompletionChart({ data }: { data: any[] }) {
+  const t = useTranslations('profile');
+  
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Goal Completion Rate</CardTitle>
-      </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <XAxis 
+              dataKey="date" 
+              tickFormatter={(date) => format(new Date(date), t('charts.dateFormat'))}
+              className="text-foreground"
+            />
+            <YAxis 
+              domain={[0, 100]}
+              tickFormatter={(value) => `${value}%`}
+              className="text-foreground"
+            />
+            <Tooltip content={<CustomLineTooltip />} />
+            <Legend formatter={(value) => <span className="text-foreground">{value}</span>} />
             <Line
               type="monotone"
               dataKey="completionRate"
               stroke="#fbbf24"
-              name="Completion Rate"
+              name={t('charts.goalCompletion.rate')}
+              dot={false}
             />
           </LineChart>
         </ResponsiveContainer>

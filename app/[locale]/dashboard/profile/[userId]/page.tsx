@@ -27,10 +27,12 @@ import { HabitCategoryChart, GoalCompletionChart, HabitBalanceChart } from "@/co
 import { subDays } from "date-fns";
 import { Achievement } from "@/components/Achievement";
 import { getUserAchievements } from "@/actions/achievements";
+import { useTranslations } from 'next-intl';
 
 export default function UserProfilePage() {
   const { userId } = useParams();
   const router = useRouter();
+  const t = useTranslations();
   const dateRange = {
     from: subDays(new Date(), 30),
     to: new Date(),
@@ -90,7 +92,7 @@ export default function UserProfilePage() {
       <div className="container mx-auto p-6">
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          {t('common.back')}
         </Button>
         <Loader />
       </div>
@@ -102,11 +104,13 @@ export default function UserProfilePage() {
       <div className="container mx-auto p-6">
         <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+          {t('common.back')}
         </Button>
         <div className="text-center mt-8">
           <p className="text-red-500">
-            {profileError ? "Error loading profile. Please try again later." : "User not found."}
+            {profileError 
+              ? t('profile.error.loading') 
+              : t('profile.error.notFound')}
           </p>
         </div>
       </div>
@@ -123,12 +127,12 @@ export default function UserProfilePage() {
           className="hover:bg-background/80"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Leaderboard
+          {t('profile.backToLeaderboard')}
         </Button>
       </div>
 
       {/* Profile Header */}
-      <div className="flex items-center gap-6 p-6 bg-background rounded-lg backdrop-blur-sm">
+      <div className="flex items-center gap-6 p-6 rounded-lg backdrop-blur-sm">
         <Avatar className="h-24 w-24">
           <AvatarImage src={profile.imageUrl ?? ''} />
           <AvatarFallback className="text-2xl">
@@ -136,9 +140,13 @@ export default function UserProfilePage() {
           </AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="text-3xl font-bold mb-2">{profile.name}&apos;s Profile</h1>
+          <h1 className="text-3xl font-bold mb-2">
+            {t('profile.title', { name: profile.name })}
+          </h1>
           <p className="text-muted-foreground">
-            Member since {new Date(profile.createdAt ?? Date.now()).toLocaleDateString()}
+            {t('profile.memberSince', { 
+              date: new Date(profile.createdAt ?? Date.now()).toLocaleDateString() 
+            })}
           </p>
         </div>
       </div>
@@ -146,27 +154,27 @@ export default function UserProfilePage() {
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Habits"
+          title={t('profile.stats.totalHabits')}
           value={profile.totalHabits}
-          description="Created habits"
+          description={t('profile.stats.habitsDesc')}
           icon={<Target className="h-4 w-4 text-blue-500" />}
         />
         <StatCard
-          title="Completed Goals"
+          title={t('profile.stats.completedGoals')}
           value={profile.completedGoals}
-          description="Total completed"
+          description={t('profile.stats.goalsDesc')}
           icon={<Trophy className="h-4 w-4 text-green-500" />}
         />
         <StatCard
-          title="Current Streak"
+          title={t('profile.stats.currentStreak')}
           value={profile.goodHabitStreak}
-          description="Days"
+          description={t('profile.stats.daysDesc')}
           icon={<Zap className="h-4 w-4 text-yellow-500" />}
         />
         <StatCard
-          title="Total Score"
+          title={t('profile.stats.totalScore')}
           value={profile.totalScore}
-          description="Points"
+          description={t('profile.stats.pointsDesc')}
           icon={<Flame className="h-4 w-4 text-orange-500" />}
         />
       </div>
@@ -175,9 +183,12 @@ export default function UserProfilePage() {
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold mt-8 flex items-center gap-2">
           <Award className="h-6 w-6 text-purple-500" />
-          Achievements
+          {t('profile.achievements.title')}
           <span className="text-base font-normal text-muted-foreground">
-            ({achievements?.filter(a => a.unlockedAt !== null).length ?? 0}/{achievements?.length ?? 0})
+            {t('profile.achievements.count', {
+              unlocked: achievements?.filter(a => a.unlockedAt !== null).length ?? 0,
+              total: achievements?.length ?? 0
+            })}
           </span>
         </h2>
 
@@ -204,7 +215,7 @@ export default function UserProfilePage() {
         {/* Charts Header */}
         <h2 className="text-2xl font-semibold mt-8 flex items-center gap-2">
           <BarChart3 className="h-6 w-6 text-primary" />
-          Statistics
+          {t('profile.statistics.title')}
         </h2>
 
         {/* Charts Grid */}
@@ -213,7 +224,7 @@ export default function UserProfilePage() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 px-2">
                 <PieChart className="h-4 w-4 text-primary" />
-                <h3 className="font-semibold">Habit Distribution</h3>
+                <h3 className="font-semibold">{t('profile.statistics.habitDistribution')}</h3>
               </div>
               <HabitBalanceChart data={habitBalance} />
             </div>
@@ -221,7 +232,7 @@ export default function UserProfilePage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-2">
                   <PieChart className="h-4 w-4 text-primary" />
-                  <h3 className="font-semibold">Category Distribution</h3>
+                  <h3 className="font-semibold">{t('profile.statistics.categoryDistribution')}</h3>
                 </div>
                 <HabitCategoryChart data={categoryDistribution} />
               </div>
@@ -233,7 +244,7 @@ export default function UserProfilePage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 px-2">
               <LineChart className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold">Goal Completion Trend</h3>
+              <h3 className="font-semibold">{t('profile.statistics.goalCompletionTrend')}</h3>
             </div>
             <GoalCompletionChart data={goalCompletionRate} />
           </div>

@@ -16,17 +16,20 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = useTranslations('navigation');
+  const locale = useLocale();
 
   const navItems = [
-    { href: "/dashboard/home", icon: Home, label: "Dashboard" },
-    { href: "/dashboard/habits", icon: CheckCircle, label: "Habits" },
-    { href: "/dashboard/goals", icon: Goal, label: "Goals" },
-    { href: "/dashboard/community", icon: Users, label: "Community" },
-    { href: "/dashboard/analytics", icon: BarChart2, label: "Analytics" },
+    { href: "/dashboard/home", icon: Home, label: t('dashboard') },
+    { href: "/dashboard/habits", icon: CheckCircle, label: t('habits') },
+    { href: "/dashboard/goals", icon: Goal, label: t('goals') },
+    { href: "/dashboard/community", icon: Users, label: t('community') },
+    { href: "/dashboard/analytics", icon: BarChart2, label: t('analytics') }
   ];
 
   useEffect(() => {
@@ -69,8 +72,11 @@ export default function Navbar() {
             ))}
           </nav>
           <div className="lg:flex-1 flex justify-end items-center gap-4">
-            <Link href="/dashboard/settings">
-              <Settings className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />
+            <Link
+              href={`/${locale}/dashboard/settings`}
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Settings className="h-5 w-5" />
             </Link>
             <UserButton />
           </div>

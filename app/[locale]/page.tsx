@@ -5,9 +5,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { ArrowRight, Award, Calendar, TrendingUp, Star, BarChart, CheckCircle, XCircle } from "lucide-react";
-import Link from "next/link";
+import Link from 'next/link';
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function Home() {
+  const t = useTranslations();
+  const locale = useLocale();
+
   return (
     <div className="min-h-screen bg-background/85 flex flex-col relative overflow-hidden">
       {[...Array(20)].map((_, i) => (
@@ -35,14 +40,14 @@ export default function Home() {
 
       <header className="w-full p-6 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href={`/${locale}`} className="flex items-center space-x-3">
             <Calendar className="h-8 w-8 text-primary" />
             <span className="font-bold text-2xl">Win a Day</span>
           </Link>
           <div className="flex items-center justify-center gap-4">
-            <Link href="/dashboard/home">
+            <Link href={`/${locale}/dashboard/home`}>
               <Button size="sm" className="flex items-center justify-center">
-                Dive in
+                {t('common.diveIn')}
                 <ArrowRight className="h-10 w-10" />
               </Button>
             </Link>
@@ -55,15 +60,24 @@ export default function Home() {
 
       <main className="container mx-auto flex-grow flex flex-col justify-center px-6">
         <div className="flex flex-col">
-          <motion.h1
-            className="text-5xl md:text-7xl font-bold leading-tight text-center mt-12 sm:mt-20"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            Transform Your Habits,{" "}
-            <span className="text-primary">Win a Day</span> 🏆
-          </motion.h1>
+          <div className="flex flex-col items-center justify-center">
+            <motion.h1
+              className="text-5xl md:text-6xl font-bold leading-tight text-center mt-12 sm:mt-20"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              {t('landing.title')}
+            </motion.h1>
+              <motion.span
+                className="text-5xl bg-primary rounded-xl p-4 md:text-6xl font-bold leading-tight text-center mt-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                Win a Day 🏆
+              </motion.span>
+          </div>
           <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mt-12 md:mt-20">
             <div className="md:w-1/2 space-y-8">
               <motion.p
@@ -72,8 +86,7 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
               >
-                Track, improve, and celebrate your daily habits with our
-                intuitive app. Turn your routines into victories!
+                {t('landing.subtitle')}
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -86,8 +99,8 @@ export default function Home() {
                   size="lg"
                   className="bg-primary hover:bg-primary/90"
                 >
-                  <Link href="/dashboard/home">
-                    Start Your Journey <ArrowRight className="h-8 w-8" />
+                  <Link href={`/${locale}/dashboard/home`}>
+                    {t('landing.startJourney')} <ArrowRight className="h-8 w-8" />
                   </Link>
                 </Button>
               </motion.div>
@@ -128,28 +141,28 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 0.8 }}
         >
           <h2 className="text-4xl font-bold text-center mb-12">
-            Why Choose Win a Day?
+            {t('landing.whyChoose')}
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <Card className="transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <CardContent className="flex flex-col items-center justify-center text-center py-12">
                 <CheckCircle className="h-12 w-12 text-primary mb-4" />
-                <h1 className="text-2xl font-bold">Track Good Habits</h1>
-                <p className="text-muted-foreground">Set and monitor positive habits to improve your daily routine.</p>
+                <h1 className="text-2xl font-bold">{t('landing.features.trackGoodHabits.title')}</h1>
+                <p className="text-muted-foreground">{t('landing.features.trackGoodHabits.description')}</p>
               </CardContent>
             </Card>
             <Card className="transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <CardContent className="flex flex-col items-center justify-center text-center py-12">
                 <XCircle className="h-12 w-12 text-primary mb-4" />
-                <h1 className="text-2xl font-bold">Break Bad Habits</h1>
-                <p className="text-muted-foreground">Identify and work on breaking negative habits holding you back.</p>
+                <h1 className="text-2xl font-bold">{t('landing.features.breakBadHabits.title')}</h1>
+                <p className="text-muted-foreground">{t('landing.features.breakBadHabits.description')}</p>
               </CardContent>
             </Card>
             <Card className="transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
               <CardContent className="flex flex-col items-center justify-center text-center py-12">
                 <BarChart className="h-12 w-12 text-primary mb-4" />
-                <h1 className="text-2xl font-bold">Visualize Progress</h1>
-                <p className="text-muted-foreground">See your improvement over time with intuitive charts and stats.</p>
+                <h1 className="text-2xl font-bold">{t('landing.features.visualizeProgress.title')}</h1>
+                <p className="text-muted-foreground">{t('landing.features.visualizeProgress.description')}</p>
               </CardContent>
             </Card>
           </div>

@@ -12,8 +12,10 @@ import { Progress } from "./ui/progress";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "./ui/card";
 import Loader from "./Loader";
+import { useTranslations } from 'next-intl';
 
 export default function AchievementsDialog() {
+  const t = useTranslations('achievements');
   const { userId } = useAuth();
   const { data: achievements, isLoading } = useQuery({
     queryKey: ["achievements", userId],
@@ -34,12 +36,12 @@ export default function AchievementsDialog() {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Trophy className="h-4 w-4" />
-          Achievements
+          {t('title')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Achievements</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{t('title')}</DialogTitle>
         </DialogHeader>
         {isLoading ? (
           <div className="flex justify-center p-8">
@@ -50,7 +52,7 @@ export default function AchievementsDialog() {
             <TabsList className="grid w-full grid-cols-4">
               {Object.values(AchievementCategory).map((category) => (
                 <TabsTrigger key={category} value={category}>
-                  {category}
+                  {t(`categories.${category.toLowerCase()}`)}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -82,7 +84,9 @@ export default function AchievementsDialog() {
                         <div className="mt-4 space-y-2">
                           {achievement.unlockedAt ? (
                             <div className="flex justify-between text-sm">
-                              <span className="text-primary font-medium">Achievement Completed!</span>
+                              <span className="text-primary font-medium">
+                                {t('completed')}
+                              </span>
                               <span className="text-muted-foreground">
                                 {achievement.unlockedAt.toLocaleDateString()}
                               </span>
@@ -94,7 +98,12 @@ export default function AchievementsDialog() {
                                 className="h-2"
                               />
                               <div className="flex justify-between text-sm text-muted-foreground">
-                                <span>Progress: {achievement.progress}/{achievement.requirement}</span>
+                                <span>
+                                  {t('progressCount', {
+                                    current: achievement.progress,
+                                    total: achievement.requirement
+                                  })}
+                                </span>
                               </div>
                             </>
                           )}

@@ -28,6 +28,7 @@ import { useEffect } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import data, { Emoji } from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
+import { useTranslations } from 'next-intl';
 
 const formSchema = z.object({
   name: z
@@ -53,6 +54,7 @@ export default function AddCategoryDialog({
   categoryId,
   initialValues,
 }: AddCategoryDialogProps) {
+  const t = useTranslations();
   const { userId } = useAuth();
   const queryClient = useQueryClient();
 
@@ -77,14 +79,14 @@ export default function AddCategoryDialog({
       setIsDialogOpen(false);
       form.reset();
       toast({
-        title: "Category created",
-        description: "Your new category has been successfully added.",
+        title: t('settings.categories.createSuccess'),
+        description: t('settings.categories.createSuccessDesc'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to create category. Please try again.",
+        title: t('common.error'),
+        description: t('settings.categories.createError'),
         variant: "destructive",
       });
       console.error("Failed to create category:", error);
@@ -97,14 +99,14 @@ export default function AddCategoryDialog({
       queryClient.invalidateQueries({ queryKey: ["user-categories"] });
       setIsDialogOpen(false);
       toast({
-        title: "Category updated",
-        description: "Your category has been successfully updated.",
+        title: t('settings.categories.updateSuccess'),
+        description: t('settings.categories.updateSuccessDesc'),
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to update category. Please try again.",
+        title: t('common.error'),
+        description: t('settings.categories.updateError'),
         variant: "destructive",
       });
       console.error("Failed to update category:", error);
@@ -132,7 +134,9 @@ export default function AddCategoryDialog({
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{categoryId ? "Edit Category" : "Add New Category"}</DialogTitle>
+          <DialogTitle>
+            {categoryId ? t('settings.categories.editTitle') : t('settings.categories.addTitle')}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -141,9 +145,9 @@ export default function AddCategoryDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('settings.categories.name')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter category name" {...field} />
+                    <Input placeholder={t('settings.categories.namePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -154,16 +158,17 @@ export default function AddCategoryDialog({
               name="icon"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between">
-                  <FormLabel>Icon</FormLabel>
+                  <FormLabel>{t('settings.categories.icon')}</FormLabel>
                   <FormControl>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline">{field.value} Select Icon</Button>
+                        <Button variant="outline">
+                          {field.value} {t('settings.categories.selectIcon')}
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
                         <Picker
                           data={data}
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           onEmojiSelect={(emoji: any) => field.onChange(emoji.native)}
                         />
                       </PopoverContent>
@@ -180,14 +185,16 @@ export default function AddCategoryDialog({
                 createCategoryMutation.isPending || updateCategoryMutation.isPending
               }
             >
-              {createCategoryMutation.isPending || updateCategoryMutation.isPending
-                ? <>
+              {createCategoryMutation.isPending || updateCategoryMutation.isPending ? (
+                <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  {t('common.saving')}
                 </>
-                : categoryId
-                ? "Update Category"
-                : "Add Category"}
+              ) : categoryId ? (
+                t('settings.categories.updateButton')
+              ) : (
+                t('settings.categories.addButton')
+              )}
             </Button>
           </form>
         </Form>

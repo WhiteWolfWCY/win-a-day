@@ -1,0 +1,405 @@
+{
+  "common": {
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "chooseTheme": "Choose your preferred theme mode",
+    "delete": "Delete",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "loading": "Loading...",
+    "diveIn": "Dive in",
+    "error": "Error",
+    "saving": "Saving...",
+    "openMenu": "Open menu",
+    "confirm": "Confirm",
+    "anonymous": "Anonymous",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "user": "User",
+    "notAvailable": "N/A",
+    "back": "Back"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "habits": "Habits",
+    "goals": "Goals",
+    "settings": "Settings",
+    "community": "Community",
+    "analytics": "Analytics",
+    "toggleMenu": "Toggle menu",
+    "closeMenu": "Close menu"
+  },
+  "habits": {
+    "addHabit": "Add Habit",
+    "editHabit": "Edit Habit",
+    "habitName": "Habit Name",
+    "habitNamePlaceholder": "Enter habit name",
+    "category": "Category",
+    "selectCategory": "Select a category",
+    "noCategories": "No categories found",
+    "isGoodHabit": "Good Habit",
+    "isGoodHabitDesc": "Is this a good habit you want to build?",
+    "addButton": "Add Habit",
+    "updateButton": "Update Habit",
+    "createSuccess": "Habit created",
+    "createSuccessDesc": "Your new habit has been successfully added.",
+    "createError": "Failed to create habit. Please try again.",
+    "updateSuccess": "Habit updated",
+    "updateSuccessDesc": "Your habit has been successfully updated.",
+    "updateError": "Failed to update habit. Please try again.",
+    "deleteConfirm": "Are you sure you want to delete the habit \"{name}\"? This action cannot be undone.",
+    "deleteSuccess": "Habit deleted",
+    "deleteSuccessDesc": "The habit has been successfully deleted.",
+    "deleteError": "Failed to delete habit. Please try again.",
+    "title": "All Habits",
+    "searchPlaceholder": "Search habits...",
+    "noHabitsFound": "No habits found",
+    "goodHabit": "Good Habit",
+    "badHabit": "Bad Habit",
+    "table": {
+      "name": "Name",
+      "category": "Category",
+      "isGoodHabit": "Good Habit?",
+      "actions": "Actions"
+    }
+  },
+  "goals": {
+    "addGoal": "Add Goal",
+    "editGoal": "Edit Goal",
+    "name": "Name",
+    "namePlaceholder": "Enter goal name",
+    "habit": "Habit",
+    "selectHabit": "Select a habit",
+    "noHabits": "No habits found",
+    "priority": {
+      "title": "Priority",
+      "select": "Select priority",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "startDate": "Start Date",
+    "finishDate": "Finish Date",
+    "pickDate": "Pick a date",
+    "goalSuccess": "Goal Success",
+    "weekDays": "Week Days",
+    "addButton": "Add Goal",
+    "updateButton": "Update Goal",
+    "createSuccess": "Goal created",
+    "createSuccessDesc": "Your goal has been successfully created.",
+    "createError": "Failed to create goal. Please try again.",
+    "updateSuccess": "Goal updated",
+    "updateSuccessDesc": "Your goal has been successfully updated.",
+    "updateError": "Failed to update goal. Please try again.",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "deleteTitle": "Delete Goal",
+    "deleteConfirm": "Are you sure you want to delete the goal \"{name}\"? This action cannot be undone.",
+    "deleteSuccess": "Goal deleted",
+    "deleteSuccessDesc": "The goal has been successfully deleted.",
+    "deleteError": "Failed to delete goal. Please try again.",
+    "title": "All Goals",
+    "searchPlaceholder": "Search goals...",
+    "noGoalsFound": "No goals found",
+    "dateFormat": "yyyy-MM-dd",
+    "progress": "{completed}/{total} successes",
+    "table": {
+      "name": "Name",
+      "priority": "Priority",
+      "finishDate": "Finish Date",
+      "days": "Days",
+      "progress": "Progress",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "completed": "Completed",
+      "inProgress": "In Progress"
+    },
+    "daysShortcut": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "settings": {
+    "userSettings": "User Settings",
+    "fullName": "Full Name",
+    "email": "Email",
+    "memberSince": "Member Since",
+    "dateFormat": "MMMM d, yyyy",
+    "achievements": "Achievements",
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "themeDesc": "Choose your preferred theme mode"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "enable": "Enable Notifications",
+      "enableDesc": "Receive notifications about your progress",
+      "email": "Email Notifications",
+      "emailDesc": "Receive notifications via email",
+      "types": "Notification Types",
+      "achievements": "Achievement Unlocks",
+      "goalCompletions": "Goal Completions",
+      "goalUpdates": "Goal Updates",
+      "habitUpdates": "Habit Updates",
+      "reminderSettings": "Reminder Settings",
+      "frequency": "Frequency",
+      "selectFrequency": "Select frequency",
+      "reminderTime": "Reminder Time",
+      "updateSuccess": "Settings updated",
+      "updateSuccessDesc": "Your notification preferences have been saved.",
+      "frequencies": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      }
+    },
+    "categories": {
+      "manageTitle": "Manage Categories",
+      "addTitle": "Add Category",
+      "editTitle": "Edit Category",
+      "addButton": "Add Category",
+      "editButton": "Edit Category",
+      "searchPlaceholder": "Search categories...",
+      "noCategories": "No categories found",
+      "deleteConfirm": "Are you sure you want to delete the category \"{name}\"? This action cannot be undone.",
+      "deleteSuccess": "Category deleted",
+      "deleteSuccessDesc": "The category has been successfully deleted.",
+      "deleteError": "Failed to delete category. Please try again.",
+      "createSuccess": "Category created",
+      "createSuccessDesc": "Your new category has been successfully added.",
+      "createError": "Failed to create category. Please try again.",
+      "updateSuccess": "Category updated",
+      "updateSuccessDesc": "Your category has been successfully updated.",
+      "updateError": "Failed to update category. Please try again.",
+      "name": "Category Name",
+      "namePlaceholder": "Enter category name",
+      "icon": "Icon",
+      "selectIcon": "Select an icon"
+    }
+  },
+  "landing": {
+    "title": "Track Your Habits. Transform Your Life.",
+    "subtitle": "Track, improve, and celebrate your daily habits with our intuitive app. Turn your routines into victories!",
+    "startJourney": "Start Your Journey",
+    "whyChoose": "Why Choose Win a Day?",
+    "features": {
+      "trackGoodHabits": {
+        "title": "Track Good Habits",
+        "description": "Set and monitor positive habits to improve your daily routine."
+      },
+      "breakBadHabits": {
+        "title": "Break Bad Habits",
+        "description": "Identify and work on breaking negative habits holding you back."
+      },
+      "visualizeProgress": {
+        "title": "Visualize Progress",
+        "description": "See your improvement over time with intuitive charts and stats."
+      }
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "title": "Overview",
+      "goalCompletion": "Goal Completion",
+      "habitAdherence": "Habit Adherence (Last 14 Days)",
+      "habitCategories": "Habit Categories",
+      "habitBalance": "Habit Balance",
+      "goodHabits": "Good Habits",
+      "badHabits": "Bad Habits",
+      "completionRate": "Completion Rate",
+      "charts": {
+        "dateFormat": "MM/dd",
+        "dateFormatLong": "MM/dd/yyyy",
+        "goalCompletion": {
+          "title": "Goal Completion",
+          "completed": "Completed",
+          "remaining": "Remaining",
+          "goals": "goals"
+        },
+        "habitAdherence": {
+          "title": "Habit Adherence",
+          "goodHabits": "Good Habits",
+          "badHabits": "Bad Habits",
+          "percentage": "Adherence rate"
+        }
+      }
+    },
+    "newestHabits": {
+      "title": "Newest Habits",
+      "noHabits": "No habits yet. Start creating some!",
+      "viewAll": "View All",
+      "category": "Category",
+      "habitType": "Type",
+      "goodHabit": "Good habit",
+      "badHabit": "Bad habit"
+    },
+    "recentGoals": {
+      "title": "Recent Goals",
+      "noGoals": "No goals yet. Start setting some!",
+      "viewAll": "View All",
+      "dueDate": "Due",
+      "habit": "Habit",
+      "priority": "Priority",
+      "finishDate": "Finish Date",
+      "days": "Days",
+      "progress": "Progress",
+      "completed": "Completed",
+      "successes": "successes"
+    },
+    "goalsForDays": {
+      "title": "Goals for Days",
+      "goalsFor": "Goals for",
+      "noGoals": "No goals for this day",
+      "addEditNote": "Add/Edit Note",
+      "enterNote": "Enter your note here...",
+      "saving": "Saving...",
+      "saveNote": "Save Note"
+    }
+  },
+  "achievements": {
+    "unlocked": "Unlocked! +{xp} XP",
+    "achievedOn": "Achieved on {date}",
+    "progress": "Progress: {current}/{total}",
+    "yourAchievements": "Your Achievements",
+    "noAchievements": "No achievements unlocked yet",
+    "unlockedOn": "Unlocked on {date}",
+    "title": "Achievements",
+    "completed": "Achievement Completed!",
+    "progressCount": "Progress: {current}/{total}",
+    "categories": {
+      "habits": "Habits",
+      "goals": "Goals",
+      "streaks": "Streaks",
+      "social": "Community"
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "totalHabits": "Total Habits Created",
+    "goalsCompleted": "Goals Completed",
+    "achievementsUnlocked": "Achievements Unlocked",
+    "currentStreak": "Current Daily Streak",
+    "totalScoreDesc": "Total Score (includes streak bonus)",
+    "points": "points"
+  },
+  "theme": {
+    "toggle": "Toggle theme",
+    "updateSuccess": "Theme updated",
+    "updateSuccessDesc": "Application theme has been changed to {theme} mode.",
+    "modes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "analytics": {
+    "title": "Your Analytics",
+    "dateRange": {
+      "title": "Select Date Range",
+      "from": "From",
+      "to": "To",
+      "pickDate": "Pick a date"
+    },
+    "cards": {
+      "totalHabits": "Total Habits",
+      "goodHabitCompletion": "Good Habit Completion",
+      "badHabitAvoidance": "Bad Habit Avoidance",
+      "categories": "Categories",
+      "goodHabitsPercentage": "{percentage}% Good",
+      "habitsCount": "{count} Habits"
+    },
+    "charts": {
+      "dateFormat": {
+        "short": "MMM dd",
+        "long": "MMM dd, yyyy"
+      },
+      "habitStreaks": {
+        "title": "Habit Streaks",
+        "currentStreak": "Current Streak",
+        "maxStreak": "Max Streak"
+      },
+      "goalCompletion": {
+        "title": "Goal Completion Rate Over Time",
+        "rate": "Completion Rate"
+      },
+      "habitBalance": {
+        "title": "Habit Balance",
+        "goodHabits": "Good Habits",
+        "badHabits": "Bad Habits",
+        "habits": "Habits",
+        "habit": "Habit",
+        "total": "Total"
+      },
+      "habitCategories": {
+        "title": "Habit Categories",
+        "total": "Total",
+        "noCategory": "No Category"
+      }
+    }
+  },
+  "profile": {
+    "title": "{name}'s Profile",
+    "memberSince": "Member since {date}",
+    "backToLeaderboard": "Back to Leaderboard",
+    "error": {
+      "loading": "Error loading profile. Please try again later.",
+      "notFound": "User not found."
+    },
+    "stats": {
+      "totalHabits": "Total Habits",
+      "habitsDesc": "Created habits",
+      "completedGoals": "Completed Goals",
+      "goalsDesc": "Total completed",
+      "currentStreak": "Current Streak",
+      "daysDesc": "Days",
+      "totalScore": "Total Score",
+      "pointsDesc": "Points"
+    },
+    "achievements": {
+      "title": "Achievements",
+      "count": "({unlocked}/{total})"
+    },
+    "statistics": {
+      "title": "Statistics",
+      "habitDistribution": "Habit Distribution",
+      "categoryDistribution": "Category Distribution",
+      "goalCompletionTrend": "Goal Completion Trend"
+    },
+    "charts": {
+      "habit": "habit",
+      "habits": "habits",
+      "dateFormat": "MMM dd",
+      "noCategory": "No Category",
+      "habitBalance": {
+        "goodHabits": "Good Habits",
+        "badHabits": "Bad Habits"
+      },
+      "goalCompletion": {
+        "rate": "Completion Rate"
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@ import { NotebookIcon, Loader2, StickyNoteIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { isFuture } from 'date-fns';
 import { cn } from "@/lib/utils";
+import { useTranslations } from 'next-intl';
 
 export default function GoalsForDays() {
   const {userId} = useAuth();
@@ -114,10 +115,12 @@ export default function GoalsForDays() {
     }
   };
 
+  const t = useTranslations('dashboard.goalsForDays');
+
   return (
     <Card className="bg-opacity-80 backdrop-blur-sm col-span-2 shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">Goals for Days</CardTitle>
+        <CardTitle className="text-2xl font-bold">{t('title')}</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row gap-8">
@@ -131,7 +134,9 @@ export default function GoalsForDays() {
           </div>
           <Separator orientation="vertical" className="hidden md:block" />
           <div className="flex-1">
-            <h3 className="font-semibold text-lg mb-4 text-center mt-0 md:-mt-16">Goals for {format(selectedDate, 'yyyy-MM-dd')}</h3>
+            <h3 className="font-semibold text-lg mb-4 text-center mt-0 md:-mt-16">
+              {t('goalsFor')} {format(selectedDate, 'yyyy-MM-dd')}
+            </h3>
             {isLoading ? (
               <Loader />
             ) : goalAttempts.length > 0 ? (
@@ -191,7 +196,7 @@ export default function GoalsForDays() {
               </ScrollArea>
             ) : (
               <div className="flex items-center justify-center text-gray-500">
-                No goals for this day
+                {t('noGoals')}
               </div>
             )}
           </div>
@@ -200,12 +205,12 @@ export default function GoalsForDays() {
       <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add/Edit Note</DialogTitle>
+            <DialogTitle>{t('addEditNote')}</DialogTitle>
           </DialogHeader>
           <Textarea
             value={currentNote}
             onChange={(e) => setCurrentNote(e.target.value)}
-            placeholder="Enter your note here..."
+            placeholder={t('enterNote')}
             className="min-h-[100px]"
           />
           <Button 
@@ -215,10 +220,10 @@ export default function GoalsForDays() {
             {updateGoalAttemptNoteMutation.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
+                {t('saving')}
               </>
             ) : (
-              'Save Note'
+              t('saveNote')
             )}
           </Button>
         </DialogContent>

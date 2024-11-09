@@ -19,12 +19,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useTranslations } from 'next-intl';
 
 export default function HabitsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { userId } = useAuth();
+  const t = useTranslations();
   const itemsPerPage = 10;
 
   const { data: habits, isLoading } = useQuery({
@@ -48,15 +50,15 @@ export default function HabitsPage() {
     <main className="container mx-auto flex-grow flex flex-col gap-6 p-6 z-10">
       <Card className="bg-opacity-80 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-2xl font-bold">All Habits</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('habits.title')}</CardTitle>
           <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add Habit
+            <Plus className="mr-2 h-4 w-4" /> {t('habits.addHabit')}
           </Button>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
             <Input
-              placeholder="Search habits..."
+              placeholder={t('habits.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -68,10 +70,10 @@ export default function HabitsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Good Habit?</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('habits.table.name')}</TableHead>
+                    <TableHead>{t('habits.table.category')}</TableHead>
+                    <TableHead>{t('habits.table.isGoodHabit')}</TableHead>
+                    <TableHead>{t('habits.table.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -86,9 +88,15 @@ export default function HabitsPage() {
                       </TableCell>
                       <TableCell>
                         {habit.isGoodHabit ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <CheckCircle2 
+                            className="h-4 w-4 text-green-500" 
+                            aria-label={t('habits.goodHabit')}
+                          />
                         ) : (
-                          <XCircle className="h-4 w-4 text-red-500" />
+                          <XCircle 
+                            className="h-4 w-4 text-red-500" 
+                            aria-label={t('habits.badHabit')}
+                          />
                         )}
                       </TableCell>
                       <TableCell>
@@ -107,6 +115,7 @@ export default function HabitsPage() {
                 <Button
                   onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
+                  aria-label={t('common.previousPage')}
                 >
                   {"<"}
                 </Button>
@@ -115,6 +124,7 @@ export default function HabitsPage() {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
+                  aria-label={t('common.nextPage')}
                 >
                   {">"}
                 </Button>
@@ -122,7 +132,7 @@ export default function HabitsPage() {
             </>
           ) : (
             <div className="flex flex-col items-center justify-center">
-              <p className="text-sm text-gray-500">No habits found</p>
+              <p className="text-sm text-gray-500">{t('habits.noHabitsFound')}</p>
             </div>
           )}
         </CardContent>

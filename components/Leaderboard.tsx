@@ -8,8 +8,10 @@ import { Trophy, Target, Award, Medal, Star, Flame, Zap } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import Loader from "./Loader";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 export default function Leaderboard() {
+  const t = useTranslations();
   const { data: leaderboard, isLoading } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: () => getLeaderboard(),
@@ -25,7 +27,7 @@ export default function Leaderboard() {
         <CardHeader>
           <CardTitle className="text-2xl font-bold flex items-center gap-2">
             <Trophy className="h-6 w-6 text-yellow-500" />
-            Leaderboard
+            {t('leaderboard.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -35,7 +37,6 @@ export default function Leaderboard() {
                 <div className={`flex items-center justify-between p-3 sm:p-4 rounded-lg bg-background/50 ${
                   index < 3 ? "border border-yellow-500/20" : ""
                 } hover:bg-background/70 transition-colors mb-2`}>
-                  {/* Left side with rank, avatar, and name of user*/}
                   <div className="flex items-center gap-2 sm:gap-4">
                     <span className="text-lg sm:text-xl font-bold min-w-[1.5rem] sm:min-w-[2rem]">
                       {index < 3 ? medals[index] : index + 1}
@@ -48,7 +49,7 @@ export default function Leaderboard() {
                     </Avatar>
                     <div>
                       <p className="font-semibold flex items-center gap-1 text-sm sm:text-base">
-                        {user.name ?? 'Anonymous'}
+                        {user.name ?? t('common.anonymous')}
                         {index === 0 && <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />}
                       </p>
                       <div className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
@@ -60,7 +61,7 @@ export default function Leaderboard() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Total Habits Created</p>
+                            <p>{t('leaderboard.totalHabits')}</p>
                           </TooltipContent>
                         </Tooltip>
 
@@ -72,7 +73,7 @@ export default function Leaderboard() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Goals Completed</p>
+                            <p>{t('leaderboard.goalsCompleted')}</p>
                           </TooltipContent>
                         </Tooltip>
 
@@ -84,7 +85,7 @@ export default function Leaderboard() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Achievements Unlocked</p>
+                            <p>{t('leaderboard.achievementsUnlocked')}</p>
                           </TooltipContent>
                         </Tooltip>
 
@@ -96,14 +97,13 @@ export default function Leaderboard() {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Current Daily Streak</p>
+                            <p>{t('leaderboard.currentStreak')}</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right side with score */}
                   <div className="text-right ml-2">
                     <Tooltip>
                       <TooltipTrigger>
@@ -113,10 +113,10 @@ export default function Leaderboard() {
                         </p>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Total Score (includes streak bonus)</p>
+                        <p>{t('leaderboard.totalScoreDesc')}</p>
                       </TooltipContent>
                     </Tooltip>
-                    <p className="text-xs sm:text-sm text-muted-foreground">points</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{t('leaderboard.points')}</p>
                   </div>
                 </div>
               </Link>

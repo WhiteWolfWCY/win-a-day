@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteHabit } from "@/actions/actions";
 import { toast } from "@/hooks/use-toast";
 import { ConfirmationDialog } from "./ConfirmationDialog";
+import { useTranslations } from 'next-intl';
 
 interface HabitMenuProps {
   habitId: string;
@@ -18,6 +19,7 @@ interface HabitMenuProps {
 }
 
 export default function HabitMenu({ habitId, habitName, categoryId, isGoodHabit }: HabitMenuProps) {
+  const t = useTranslations();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -28,15 +30,15 @@ export default function HabitMenu({ habitId, habitName, categoryId, isGoodHabit 
       queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
       queryClient.invalidateQueries({ queryKey: ["user-habits"] });
       toast({
-        title: "Habit deleted",
-        description: "The habit has been successfully deleted.",
+        title: t('habits.deleteSuccess'),
+        description: t('habits.deleteSuccessDesc'),
       });
       setIsDeleteDialogOpen(false);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to delete habit. Please try again.",
+        title: t('common.error'),
+        description: t('habits.deleteError'),
         variant: "destructive",
       });
       console.error("Failed to delete habit:", error);
@@ -52,18 +54,18 @@ export default function HabitMenu({ habitId, habitName, categoryId, isGoodHabit 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('common.openMenu')}</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
             <Pencil className="mr-2 h-4 w-4" />
-            Edit
+            {t('common.edit')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)}>
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete
+            {t('common.delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -81,10 +83,10 @@ export default function HabitMenu({ habitId, habitName, categoryId, isGoodHabit 
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDelete}
-        title="Delete Habit"
-        description={`Are you sure you want to delete the habit "${habitName}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('habits.deleteTitle')}
+        description={t('habits.deleteConfirm', { name: habitName })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         isLoading={deleteHabitMutation.isPending}
       />
     </>
