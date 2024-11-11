@@ -23,6 +23,7 @@ export async function POST(
           Please provide your response in ${locale === 'en' ? 'English' : 'Polish'} language.
           Be encouraging and supportive while providing practical advice.
           Format your responses using markdown for better readability.
+          If the message is not about habits or goals, or personal development, respond with "I'm sorry, I can only help with habits and goals.
           Current user context:
           ${JSON.stringify({ habits, goals }, null, 2)}`
         },
