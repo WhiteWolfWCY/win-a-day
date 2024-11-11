@@ -1,9 +1,10 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
+import { User, WebhookEvent } from '@clerk/nextjs/server'
 import { createCategory, createUser } from '@/actions/actions'
 import { db } from "@/db/drizzle";
-import { UserNotificationSettings, NotificationFrequency } from "@/db/schema";
+import { UserNotificationSettings, NotificationFrequency, Users } from "@/db/schema";
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   // You can find this in the Clerk Dashboard -> Webhooks -> choose the endpoint
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
     const userData = {
         id: evt.data.id,
         email: evt.data.email_addresses[0].email_address,
-        name: evt.data.first_name || "N/A" + ' ' + evt.data.last_name || "",
+        name: (evt.data.first_name || "N/A") + ' ' + (evt.data.last_name || ""),
         imgUrl: evt.data.image_url,
         joinDate: new Date().toISOString(),
     }
@@ -88,6 +89,16 @@ export async function POST(req: Request) {
       reminderFrequency: NotificationFrequency.DAILY,
       reminderTime: defaultReminderTime,
     });
+  }
+
+  if(evt.type === 'user.updated') {
+    const userData = {
+      email: evt.data.email_addresses[0].email_address,
+      name: (evt.data.first_name || "N/A") + ' ' + (evt.data.last_name || ""),
+      imgUrl: evt.data.image_url,
+    }
+
+    await db.update(Users).set(userData).where(eq(Users.id, evt.data.id))
   }
 
   return new Response('', { status: 200 })
