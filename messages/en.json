@@ -20,7 +20,8 @@
     "nextPage": "Next page",
     "user": "User",
     "notAvailable": "N/A",
-    "back": "Back"
+    "back": "Back",
+    "thinking": "Thinking..."
   },
   "auth": {
     "signIn": "Sign In",
@@ -277,7 +278,10 @@
       "enterNote": "Enter your note here...",
       "saving": "Saving...",
       "saveNote": "Save Note"
-    }
+    },
+    "aiInsights": "AI Insights",
+    "getAIAnalysis": "Get AI Analysis",
+    "newAnalysis": "Get New Analysis"
   },
   "achievements": {
     "unlocked": "Unlocked! +{xp} XP",
@@ -400,6 +404,37 @@
       "goalCompletion": {
         "rate": "Completion Rate"
       }
+    }
+  },
+  "ai": {
+    "tabs": {
+      "insights": "Insights",
+      "suggestions": "Suggestions",
+      "chat": "Chat"
+    },
+    "insights": {
+      "title": "AI Habits and Goals Analysis",
+      "description": "Receive personalized insights about your habits and goals using advanced AI analysis.",
+      "features": {
+        "habits": "Analysis of your current habits and their impact",
+        "goals": "Evaluation of goal progress and patterns",
+        "recommendations": "Personalized recommendations for improvement"
+      }
+    },
+    "suggestions": {
+      "title": "Intelligent Suggestions",
+      "description": "Receive personalized suggestions for new habits and goals based on your current progress.",
+      "generate": "Generate Suggestions",
+      "recommendedHabits": "Recommended Habits",
+      "recommendedGoals": "Recommended Goals",
+      "newSuggestions": "Get New Suggestions"
+    },
+    "chat": {
+      "title": "AI Assistant",
+      "description": "Chat with your AI assistant about habits, goals, and personal development. Receive personalized advice and answers to your questions.",
+      "placeholder": "Enter your message...",
+      "send": "Send",
+      "thinking": "AI is thinking..."
     }
   }
 }

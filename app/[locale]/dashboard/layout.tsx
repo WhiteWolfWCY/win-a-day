@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import QueryClientProvider from "@/components/QueryClientProvider";
 import { motion } from "framer-motion";
 import { Toaster } from "@/components/ui/toaster";
+import { AIAssistant } from "@/components/AIAssistant";
 
 export default function DashboardLayout({
   children,
@@ -44,6 +45,7 @@ export default function DashboardLayout({
             {children}
           </MaxWidthWrapper>
           <Toaster />
+          <AIAssistant />
         </div>
       </QueryClientProvider>
     </>

@@ -20,7 +20,8 @@
     "nextPage": "Następna strona",
     "user": "Użytkownik",
     "notAvailable": "Brak",
-    "back": "Wstecz"
+    "back": "Wstecz",
+    "thinking": "Myślę..."
   },
   "auth": {
     "signIn": "Zaloguj się",
@@ -282,7 +283,10 @@
       "enterNote": "Wpisz swoją notatkę tutaj...",
       "saving": "Zapisywanie...",
       "saveNote": "Zapisz Notatkę"
-    }
+    },
+    "aiInsights": "Analiza AI",
+    "getAIAnalysis": "Pobierz Analizę AI",
+    "newAnalysis": "Pobierz Nową Analizę"
   },
   "achievements": {
     "unlocked": "Odblokowano! +{xp} XP",
@@ -405,6 +409,37 @@
       "goalCompletion": {
         "rate": "Stopień Realizacji"
       }
+    }
+  },
+  "ai": {
+    "tabs": {
+      "insights": "Analiza",
+      "suggestions": "Sugestie",
+      "chat": "Czat"
+    },
+    "insights": {
+      "title": "Analiza AI Nawyków i Celów",
+      "description": "Otrzymaj spersonalizowane spostrzeżenia na temat swoich nawyków i celów przy użyciu zaawansowanej analizy AI.",
+      "features": {
+        "habits": "Analiza Twoich obecnych nawyków i ich wpływu",
+        "goals": "Ocena postępów w realizacji celów i wzorców",
+        "recommendations": "Spersonalizowane zalecenia dotyczące poprawy"
+      }
+    },
+    "suggestions": {
+      "title": "Inteligentne Sugestie",
+      "description": "Otrzymuj sugestie nowych nawyków i celów oparte na sztucznej inteligencji, bazujące na Twoich obecnych postępach.",
+      "generate": "Wygeneruj Sugestie",
+      "recommendedHabits": "Zalecane Nawyki",
+      "recommendedGoals": "Zalecane Cele",
+      "newSuggestions": "Pobierz Nowe Sugestie"
+    },
+    "chat": {
+      "title": "Asystent AI",
+      "description": "Rozmawiaj ze swoim asystentem AI o nawykach, celach i rozwoju osobistym. Otrzymuj spersonalizowane porady i odpowiedzi na swoje pytania.",
+      "placeholder": "Wpisz swoją wiadomość...",
+      "send": "Wyślij",
+      "thinking": "AI myśli..."
     }
   }
 } 
