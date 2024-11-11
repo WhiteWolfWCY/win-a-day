@@ -274,7 +274,8 @@
       "days": "Dni",
       "progress": "Postęp",
       "completed": "Ukończony",
-      "successes": "sukcesów"
+      "successes": "sukcesów",
+      "pastDue": "Po terminie"
     },
     "goalsForDays": {
       "title": "Cele na Dni",
