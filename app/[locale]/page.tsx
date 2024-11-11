@@ -13,30 +13,40 @@ export default function Home() {
   const t = useTranslations();
   const locale = useLocale();
 
+  const floatingElements = Array.from({ length: 20 }, (_, i) => ({
+    width: 50 + (((i * 7) % 11) * 10),
+    height: 50 + (((i * 11) % 7) * 10),
+    top: `${(i * 5) % 100}%`,
+    left: `${(i * 7) % 100}%`,
+    yOffset: ((i * 13) % 10) * 10 - 50,
+    xOffset: ((i * 17) % 10) * 10 - 50,
+    duration: 10 + ((i * 3) % 10),
+  }));
+
   return (
     <div className="min-h-screen bg-background/85 flex flex-col relative overflow-hidden">
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-primary/20"
-          style={{
-            width: Math.random() * 100 + 50,
-            height: Math.random() * 100 + 50,
-            top: `${Math.random() * 100}%`,
-            left: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, Math.random() * 100 - 50],
-            x: [0, Math.random() * 100 - 50],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: Math.random() * 10 + 10,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-        />
-      ))}
+      {floatingElements.map((elem, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full floating-element"
+              style={{
+                width: elem.width,
+                height: elem.height,
+                top: elem.top,
+                left: elem.left,
+              }}
+              animate={{
+                y: [0, elem.yOffset],
+                x: [0, elem.xOffset],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: elem.duration,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+            />
+          ))}
 
       <header className="w-full p-6 bg-background/80 backdrop-blur-sm border-b">
         <div className="container mx-auto flex justify-between items-center">
@@ -45,7 +55,7 @@ export default function Home() {
             <span className="font-bold text-2xl">Win a Day</span>
           </Link>
           <div className="flex items-center justify-center gap-4">
-            <Link href={`/${locale}/dashboard/home`}>
+          <Link href={`/${locale}/sign-in`}>
               <Button size="sm" className="flex items-center justify-center">
                 {t('common.diveIn')}
                 <ArrowRight className="h-10 w-10" />
@@ -99,7 +109,7 @@ export default function Home() {
                   size="lg"
                   className="bg-primary hover:bg-primary/90"
                 >
-                  <Link href={`/${locale}/dashboard/home`}>
+                  <Link href={`/${locale}/sign-in`}>
                     {t('landing.startJourney')} <ArrowRight className="h-8 w-8" />
                   </Link>
                 </Button>

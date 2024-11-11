@@ -39,6 +39,7 @@
     "closeMenu": "Close menu"
   },
   "habits": {
+    "deleteTitle": "Delete Habit",
     "addHabit": "Add Habit",
     "editHabit": "Edit Habit",
     "habitName": "Habit Name",

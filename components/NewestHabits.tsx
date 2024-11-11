@@ -53,7 +53,7 @@ export default function NewestHabits() {
                     <p className="text-sm text-gray-500">
                       {`${t('category')}: ${habit.habitCategoryIcon} ${habit.habitCategory}`}
                     </p>
-                    <p className="text-sm text-gray-500 flex items-center">
+                    <div className="text-sm text-gray-500 flex items-center">
                       {`${t('habitType')}: `}
                       {habit.habitType ? (
                         <>
@@ -66,7 +66,7 @@ export default function NewestHabits() {
                           <XCircle className="h-4 w-4 text-red-500 ml-1" />
                         </>
                       )}
-                    </p>
+                    </div>
                   </div>
                   <HabitMenu
                     habitId={habit.habitId}

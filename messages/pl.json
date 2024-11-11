@@ -39,6 +39,7 @@
     "closeMenu": "Zamknij menu"
   },
   "habits": {
+    "deleteTitle": "Usuń Nawyk",
     "addHabit": "Dodaj Nawyk",
     "editHabit": "Edytuj Nawyk",
     "habitName": "Nazwa Nawyku",
