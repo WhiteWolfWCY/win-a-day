@@ -17,6 +17,8 @@ import { format } from "date-fns";
 import { GoalPriority, WeekDays } from "@/db/schema";
 import Loader from "./Loader";
 import { getPriorityColorClass } from "@/lib/utils";
+import { isPast } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function RecentGoals() {
   const t = useTranslations('dashboard.recentGoals');
@@ -62,47 +64,69 @@ export default function RecentGoals() {
               {goals?.length === 0 ? (
                 <div className="text-muted-foreground">{t('noGoals')}</div>
               ) : (
-                goals?.map((goal) => (
-                  <div 
-                    key={goal.id} 
-                    className={`flex flex-col py-4 ${
-                      goal.isCompleted ? "bg-green-50/50 dark:bg-green-950/20 rounded-lg px-3" : ""
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{goal.name}</h3>
-                          {goal.isCompleted && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                              {t('completed')}
-                            </span>
-                          )}
+                goals?.map((goal) => {
+                  const isPastDue = isPast(new Date(goal.finishDate)) && !goal.isCompleted;
+                  
+                  return (
+                    <div 
+                      key={goal.id} 
+                      className={cn(
+                        "flex flex-col py-4",
+                        goal.isCompleted && "bg-green-50/50 dark:bg-green-950/20 rounded-lg px-3",
+                        isPastDue && "bg-red-50/50 dark:bg-red-950/20 rounded-lg px-3"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{goal.name}</h3>
+                            {goal.isCompleted ? (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                                {t('completed')}
+                              </span>
+                            ) : isPastDue ? (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                {t('pastDue')}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                {t('inProgress')}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500">{t('habit')}: {goal.habitName}</p>
                         </div>
-                        <p className="text-sm text-gray-500">{t('habit')}: {goal.habitName}</p>
+                        <GoalMenu
+                          goalId={goal.id}
+                          goalName={goal.name}
+                          habitId={goal.habitId!}
+                          priority={goal.priority}
+                          startDate={goal.startDate}
+                          finishDate={goal.finishDate}
+                          goalSuccess={goal.goalSuccess}
+                          weekDays={goal.weekDays!}
+                        />
                       </div>
-                      <GoalMenu
-                        goalId={goal.id}
-                        goalName={goal.name}
-                        habitId={goal.habitId!}
-                        priority={goal.priority}
-                        startDate={goal.startDate}
-                        finishDate={goal.finishDate}
-                        goalSuccess={goal.goalSuccess}
-                        weekDays={goal.weekDays!}
-                      />
+                      <div className="mt-2 text-sm">
+                        <p>{t('priority')}: <span className={`font-semibold ${getPriorityColorClass(goal.priority)}`}>{goal.priority}</span></p>
+                        <p>{t('finishDate')}: {format(new Date(goal.finishDate), 'yyyy-MM-dd')}</p>
+                        <p>{t('days')}: {getWeekDaysString(goal.weekDays!)}</p>
+                        <p className={cn(
+                          "font-medium",
+                          isPastDue && "text-red-600 dark:text-red-400"
+                        )}>
+                          {t('progress')}: {goal.completedAttempts || 0}/{goal.goalSuccess} {t('successes')}
+                        </p>
+                      </div>
+                      <p className={cn(
+                        "text-sm text-gray-500",
+                        isPastDue && "text-red-500 dark:text-red-400"
+                      )}>
+                        {`${t('dueDate')}: ${format(new Date(goal.finishDate), 'yyyy-MM-dd')}`}
+                      </p>
                     </div>
-                    <div className="mt-2 text-sm">
-                      <p>{t('priority')}: <span className={`font-semibold ${getPriorityColorClass(goal.priority)}`}>{goal.priority}</span></p>
-                      <p>{t('finishDate')}: {format(new Date(goal.finishDate), 'yyyy-MM-dd')}</p>
-                      <p>{t('days')}: {getWeekDaysString(goal.weekDays!)}</p>
-                      <p>{t('progress')}: {goal.completedAttempts || 0}/{goal.goalSuccess} {t('successes')}</p>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      {`${t('dueDate')}: ${format(new Date(goal.finishDate), 'yyyy-MM-dd')}`}
-                    </p>
-                  </div>
-                ))
+                  );
+                })
               )}
               <GoalDialog
                 isDialogOpen={isDialogOpen}

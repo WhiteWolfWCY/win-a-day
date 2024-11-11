@@ -22,6 +22,7 @@ import {
 import { format } from "date-fns";
 import { GoalPriority, WeekDays } from "@/db/schema";
 import { useTranslations } from 'next-intl';
+import { cn } from "@/lib/utils";
 
 export default function GoalsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -111,7 +112,10 @@ export default function GoalsPage() {
                   {paginatedGoals.map((goal) => (
                     <TableRow 
                       key={goal.id}
-                      className={goal.isCompleted ? "bg-green-50/50 dark:bg-green-950/20" : ""}
+                      className={cn(
+                        goal.isCompleted ? "bg-green-50/50 dark:bg-green-950/20" : "",
+                        goal.isPastDue ? "bg-red-50/50 dark:bg-red-950/20" : ""
+                      )}
                     >
                       <TableCell>{goal.name}</TableCell>
                       <TableCell>
@@ -133,6 +137,10 @@ export default function GoalsPage() {
                         {goal.isCompleted ? (
                           <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                             {t('goals.status.completed')}
+                          </span>
+                        ) : goal.isPastDue ? (
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                            {t('goals.status.pastDue')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">

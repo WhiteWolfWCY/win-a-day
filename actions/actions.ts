@@ -153,6 +153,8 @@ export async function createGoal(goalData: NewGoal) {
 
 //get all user goals
 export async function getAllUserGoals(userId: string) {
+  const today = new Date().toISOString().split('T')[0];
+  
   const goals = await db.select({
     id: Goals.id,
     name: Goals.name,
@@ -164,6 +166,7 @@ export async function getAllUserGoals(userId: string) {
     finishDate: Goals.finishDate,
     goalSuccess: Goals.goalSuccess,
     weekDays: Goals.weekDays,
+    isPastDue: sql<boolean>`${Goals.finishDate} < ${today}::date AND ${Goals.isCompleted} = false`,
     completedAttempts: sql<number>`(
       SELECT CAST(COUNT(*) AS INTEGER)
       FROM ${GoalsAttempts}
@@ -529,6 +532,7 @@ export async function getUserGoalsForDay(date: string, userId: string) {
     .select({
       goalAttempt: GoalsAttempts,
       goal: Goals,
+      isPastDue: sql<boolean>`${Goals.finishDate} < ${date}::date`,
     })
     .from(GoalsAttempts)
     .innerJoin(Goals, eq(Goals.id, GoalsAttempts.goalId))
@@ -536,7 +540,8 @@ export async function getUserGoalsForDay(date: string, userId: string) {
       and(
         eq(GoalsAttempts.date, date),
         eq(Goals.userId, userId),
-        eq(Goals.isCompleted, false)
+        eq(Goals.isCompleted, false),
+        sql`${Goals.finishDate} >= ${date}::date` // Only include goals that haven't passed their finish date
       )
     );
 

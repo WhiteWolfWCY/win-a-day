@@ -130,7 +130,8 @@
     },
     "status": {
       "completed": "Completed",
-      "inProgress": "In Progress"
+      "inProgress": "In Progress",
+      "pastDue": "Past Due"
     },
     "daysShortcut": {
       "mon": "Mon",
@@ -267,8 +268,10 @@
       "finishDate": "Finish Date",
       "days": "Days",
       "progress": "Progress",
+      "successes": "successes",
       "completed": "Completed",
-      "successes": "successes"
+      "pastDue": "Past Due",
+      "inProgress": "In Progress"
     },
     "goalsForDays": {
       "title": "Goals for Days",

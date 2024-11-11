@@ -141,58 +141,71 @@ export default function GoalsForDays() {
               <Loader />
             ) : goalAttempts.length > 0 ? (
               <ScrollArea className="pr-4">
-                {goalAttempts.map((attempt) => (
-                  <div 
-                    key={attempt.goalAttempt.id} 
-                    className={cn(
-                      "py-3 flex items-center justify-between border-b last:border-b-0",
-                      loadingAttempts.has(attempt.goalAttempt.id) && "opacity-50 pointer-events-none"
-                    )}
-                  >
-                    <div className={`flex-1 ${attempt.goalAttempt.isCompleted ? 'line-through text-gray-400' : ''}`}>
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-medium">{attempt.goal.name}</h4>
-                        {attempt.goalAttempt.note && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <StickyNoteIcon className="h-4 w-4 text-yellow-500" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <div className="bg-yellow-100 p-2 rounded-md shadow-md max-w-xs">
-                                  <p className="text-sm text-gray-700">{attempt.goalAttempt.note}</p>
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500">{attempt.goal.priority}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openNoteDialog(attempt.goalAttempt.id, attempt.goalAttempt.note || '')}
-                        disabled={loadingAttempts.has(attempt.goalAttempt.id)}
-                      >
-                        <NotebookIcon className="h-4 w-4" />
-                      </Button>
-                      {!isFuture(new Date(attempt.goalAttempt.date)) && (
+                {goalAttempts.map((attempt) => {
+                  const isPastDue = new Date(attempt.goal.finishDate) < new Date(attempt.goalAttempt.date);
+                  
+                  return (
+                    <div 
+                      key={attempt.goalAttempt.id} 
+                      className={cn(
+                        "py-3 flex items-center justify-between border-b last:border-b-0",
+                        loadingAttempts.has(attempt.goalAttempt.id) && "opacity-50 pointer-events-none",
+                        isPastDue && "opacity-50 bg-red-50/10"
+                      )}
+                    >
+                      <div className={cn(
+                        "flex-1",
+                        attempt.goalAttempt.isCompleted ? 'line-through text-gray-400' : '',
+                      )}>
                         <div className="flex items-center space-x-2">
-                          <Checkbox
-                            checked={attempt.goalAttempt.isCompleted || false}
-                            onCheckedChange={(checked) => toggleGoalCompletion(attempt.goalAttempt.id, checked as boolean)}
-                            disabled={loadingAttempts.has(attempt.goalAttempt.id)}
-                          />
-                          {loadingAttempts.has(attempt.goalAttempt.id) && (
-                            <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                          <h4 className="font-medium">{attempt.goal.name}</h4>
+                          {isPastDue && (
+                            <span className="text-xs text-red-500 px-2 py-0.5 rounded-full bg-red-100/50">
+                              {t('goals.status.pastDue')}
+                            </span>
+                          )}
+                          {attempt.goalAttempt.note && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <StickyNoteIcon className="h-4 w-4 text-yellow-500" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="bg-yellow-100 p-2 rounded-md shadow-md max-w-xs">
+                                    <p className="text-sm text-gray-700">{attempt.goalAttempt.note}</p>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </div>
-                      )}
+                        <p className="text-sm text-gray-500">{attempt.goal.priority}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openNoteDialog(attempt.goalAttempt.id, attempt.goalAttempt.note || '')}
+                          disabled={loadingAttempts.has(attempt.goalAttempt.id) || isPastDue}
+                        >
+                          <NotebookIcon className="h-4 w-4" />
+                        </Button>
+                        {!isFuture(new Date(attempt.goalAttempt.date)) && !isPastDue && (
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              checked={attempt.goalAttempt.isCompleted || false}
+                              onCheckedChange={(checked) => toggleGoalCompletion(attempt.goalAttempt.id, checked as boolean)}
+                              disabled={loadingAttempts.has(attempt.goalAttempt.id) || isPastDue}
+                            />
+                            {loadingAttempts.has(attempt.goalAttempt.id) && (
+                              <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </ScrollArea>
             ) : (
               <div className="flex items-center justify-center text-gray-500">

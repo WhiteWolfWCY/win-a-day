@@ -121,7 +121,8 @@
     },
     "status": {
       "completed": "Ukończony",
-      "inProgress": "W Trakcie"
+      "inProgress": "W trakcie",
+      "pastDue": "Po terminie"
     },
     "priorities": {
       "low": "Niski",
@@ -272,7 +273,7 @@
       "finishDate": "Data Zakończenia",
       "days": "Dni",
       "progress": "Postęp",
-      "completed": "Ukończone",
+      "completed": "Ukończony",
       "successes": "sukcesów"
     },
     "goalsForDays": {
