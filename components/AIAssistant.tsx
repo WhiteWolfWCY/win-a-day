@@ -318,7 +318,7 @@ function AIChatContent() {
                   : "bg-primary/60 text-black"
               )}
             >
-              <ReactMarkdown className="prose  prose-sm dark:prose-invert">
+              <ReactMarkdown>
                 {message.content}
               </ReactMarkdown>
             </div>
