@@ -225,7 +225,7 @@ export default function AddHabitDialog({
                     </FormControl>
                     <SelectContent>
                       {isCategoriesLoading ? (
-                        <SelectItem value="">{t('common.loading')}</SelectItem>
+                        <SelectItem value="loading">{t('common.loading')}</SelectItem>
                       ) : categories && categories.length > 0 ? (
                         categories.map((category) => (
                           <SelectItem key={category.id} value={category.id}>
@@ -233,7 +233,9 @@ export default function AddHabitDialog({
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="">{t('habits.noCategories')}</SelectItem>
+                        <SelectItem value="no-categories" disabled>
+                          {t('habits.noCategories')}
+                        </SelectItem>
                       )}
                     </SelectContent>
                   </Select>
