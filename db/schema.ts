@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { boolean, date, integer, uuid, timestamp } from "drizzle-orm/pg-core";
+import { boolean, date, integer, uuid, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { pgTable, text } from "drizzle-orm/pg-core";
 import { pgEnum } from "drizzle-orm/pg-core";
 
@@ -93,7 +93,8 @@ export const GoalsAttempts = pgTable("goalsAttempts", { //dla kazdego dnia dla c
     goalId: uuid("goalId").references(() => Goals.id),
     date: date("date").notNull(),
     isCompleted: boolean("isCompleted").default(false),
-    note: text("note")
+    note: text("note"),
+    calendarEventId: text("calendar_event_id")
 });
 
 export const Achievements = pgTable("achievements", {
@@ -152,4 +153,25 @@ export const UserNotificationSettings = pgTable("user_notification_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Create a table to store Google Calendar tokens
+export const GoogleCalendarTokens = pgTable("google_calendar_tokens", {
+  userId: text("user_id").primaryKey().references(() => Users.id),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token"),
+  expiryDate: timestamp("expiry_date"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const GoalCalendarSync = pgTable("goal_calendar_sync", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  goalId: uuid("goalId").references(() => Goals.id),
+  userId: text("userId").references(() => Users.id),
+  isEnabled: boolean("is_enabled").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  // Add unique constraint on goalId and userId combination
+  unq: uniqueIndex('goal_calendar_sync_goal_user_unique').on(table.goalId, table.userId)
+}));
 

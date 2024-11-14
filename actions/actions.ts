@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays, Achievements, UserAchievements, AchievementCategory } from "@/db/schema";
+import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays, Achievements, UserAchievements, AchievementCategory, GoogleCalendarTokens, GoalCalendarSync } from "@/db/schema";
 import { eq, and, desc, sql, inArray, gte, lte, or, lt, gt, notInArray } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 import { parseISO, subDays, startOfDay, endOfDay } from 'date-fns';
@@ -860,3 +860,26 @@ async function handleGoalCompletion(userId: string, goalId: string, goalName: st
 // Add to existing goal completion logic:
 startLine: 414
 endLine: 440
+
+export async function checkGoogleCalendarConnection(userId: string) {
+  const tokens = await db
+    .select()
+    .from(GoogleCalendarTokens)
+    .where(eq(GoogleCalendarTokens.userId, userId));
+
+  return tokens.length > 0;
+}
+
+export async function getSyncedGoals(userId: string) {
+  const syncedGoals = await db
+    .select()
+    .from(GoalCalendarSync)
+    .where(
+      and(
+        eq(GoalCalendarSync.userId, userId),
+        eq(GoalCalendarSync.isEnabled, true)
+      )
+    );
+  
+  return syncedGoals;
+}

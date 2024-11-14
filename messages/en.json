@@ -201,6 +201,19 @@
       "namePlaceholder": "Enter category name",
       "icon": "Icon",
       "selectIcon": "Select an icon"
+    },
+    "calendar": {
+      "title": "Calendar Integration",
+      "connect": "Connect Calendar",
+      "error": "Connection Error",
+      "connectionError": "Failed to connect to Google Calendar. Please try again.",
+      "success": "Calendar Updated",
+      "syncSuccess": "Calendar reminders have been successfully synchronized",
+      "reminderTime": "Reminder Time",
+      "noHabits": "No habits found to sync",
+      "description": "Connect your Google Calendar to receive habit reminders",
+      "checking": "Checking connection...",
+      "connected": "Connected to Google Calendar"
     }
   },
   "landing": {

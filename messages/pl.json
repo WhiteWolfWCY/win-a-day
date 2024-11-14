@@ -206,6 +206,19 @@
       "namePlaceholder": "Wprowadź nazwę kategorii",
       "icon": "Ikona",
       "selectIcon": "Wybierz ikonę"
+    },
+    "calendar": {
+      "title": "Integracja z Kalendarzem",
+      "connect": "Połącz z Kalendarzem",
+      "error": "Błąd Połączenia",
+      "connectionError": "Nie udało się połączyć z Kalendarzem Google. Spróbuj ponownie.",
+      "success": "Kalendarz Zaktualizowany",
+      "syncSuccess": "Przypomnienia zostały pomyślnie zsynchronizowane z kalendarzem",
+      "reminderTime": "Czas Przypomnienia",
+      "noHabits": "Nie znaleziono nawyków do synchronizacji",
+      "description": "Połącz swój Kalendarz Google, aby otrzymywać przypomnienia o nawykach",
+      "checking": "Sprawdzanie połączenia...",
+      "connected": "Połączony z Kalendarzem Google"
     }
   },
   "landing": {

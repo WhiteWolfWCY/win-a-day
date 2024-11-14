@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS "goal_calendar_sync_goal_user_unique" ON "goal_calendar_sync" USING btree ("goalId","userId");

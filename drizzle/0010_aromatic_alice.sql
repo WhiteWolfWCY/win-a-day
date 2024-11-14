@@ -1,0 +1,1 @@
+DROP TABLE "habit_calendar_sync";

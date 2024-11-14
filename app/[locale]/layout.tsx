@@ -47,7 +47,8 @@ export default async function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <ClerkProvider 
+            <ClerkProvider
+              dynamic
               afterSignOutUrl={`/${locale}`}
             >
               {children}

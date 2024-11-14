@@ -11,12 +11,13 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "test": "jest"
+    "test": "node --max-old-space-size=4096 node_modules/.bin/jest"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.0.0",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
+    "@google-cloud/local-auth": "^3.0.1",
     "@hookform/resolvers": "^3.9.0",
     "@neondatabase/serverless": "^0.10.1",
     "@radix-ui/react-avatar": "^1.1.1",
@@ -41,6 +42,7 @@
     "date-fns": "^3.6.0",
     "drizzle-orm": "^0.35.3",
     "framer-motion": "^11.11.9",
+    "googleapis": "^144.0.0",
     "lucide-react": "^0.453.0",
     "next": "14.2.15",
     "next-intl": "^3.24.0",

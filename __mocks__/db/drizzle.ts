@@ -6,12 +6,10 @@ export const db = {
   innerJoin: jest.fn().mockReturnThis(),
   where: jest.fn().mockReturnThis(),
   groupBy: jest.fn().mockReturnThis(),
-  execute: jest.fn().mockResolvedValueOnce([])
-  };
+  execute: jest.fn().mockResolvedValue([])
+};
 
-  jest.mock('../db/schemat', () => ({
-    get db() {
-      return db;
-    }
-  }));
+jest.mock('../db/schemat', () => ({
+  db
+}));
   
