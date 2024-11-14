@@ -166,15 +166,6 @@ export default function NotificationSettings() {
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-2">
-            <Label>{t('settings.notifications.reminderTime')}</Label>
-            <TimePickerInput
-              value={reminderTime || (settings?.reminderTime ? new Date(settings.reminderTime) : undefined)}
-              onChange={handleTimeChange}
-              disabled={!settings?.notificationsEnabled}
-            />
-          </div>
         </div>
       </CardContent>
     </Card>
