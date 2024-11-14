@@ -52,11 +52,20 @@ export default function QuotesDialog({ open, onOpenChange }: QuotesDialogProps) 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habits"] });
+      queryClient.invalidateQueries({ queryKey: ["newest-habits"] });
       toast({
         title: "Quote attached successfully",
         description: "The quote has been attached to your habit.",
       });
       setIsHabitDialogOpen(false);
+      setSelectedQuote(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to attach quote to habit.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -102,7 +111,11 @@ export default function QuotesDialog({ open, onOpenChange }: QuotesDialogProps) 
                   <Button
                     variant="outline"
                     size="icon"
-                    className="rounded-full hover:bg-[#FFB800]/10 border-[#FFB800] h-8 w-8 flex-shrink-0"
+                    disabled={attachQuoteMutation.isPending}
+                    className={cn(
+                      "rounded-full hover:bg-[#FFB800]/10 border-[#FFB800] h-8 w-8 flex-shrink-0",
+                      "disabled:opacity-50 disabled:cursor-not-allowed"
+                    )}
                     onClick={() => {
                       setSelectedQuote(quote);
                       setIsHabitDialogOpen(true);
@@ -132,7 +145,12 @@ export default function QuotesDialog({ open, onOpenChange }: QuotesDialogProps) 
                 <Button
                   key={habit.id}
                   variant="outline"
-                  className="justify-start hover:bg-[#FFB800]/10 border-[#FFB800]/50"
+                  disabled={attachQuoteMutation.isPending}
+                  className={cn(
+                    "justify-start hover:bg-[#FFB800]/10 border-[#FFB800]/50",
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                    attachQuoteMutation.isPending && "relative"
+                  )}
                   onClick={() => {
                     if (selectedQuote) {
                       attachQuoteMutation.mutate({
@@ -143,6 +161,9 @@ export default function QuotesDialog({ open, onOpenChange }: QuotesDialogProps) 
                   }}
                 >
                   {habit.name}
+                  {attachQuoteMutation.isPending && (
+                    <Loader2 className="h-4 w-4 animate-spin ml-2 absolute right-4" />
+                  )}
                 </Button>
               ))}
             </div>

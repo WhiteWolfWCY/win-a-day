@@ -46,6 +46,8 @@ import { saveAs } from 'file-saver';
 import ExcelJS from 'exceljs';
 import * as htmlToImage from 'html-to-image';
 import JSZip from 'jszip';
+import { Loader2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const COLORS = ["#fbbf24", "#fcd34d", "#fde68a", "#fef3c7", "#fffbeb"];
 
@@ -56,6 +58,7 @@ export default function AnalyticsPage() {
     to: new Date(),
   });
   const t = useTranslations();
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const { data: habitStreaks, isLoading: isLoadingStreaks } = useQuery({
     queryKey: ["habit-streaks", userId, dateRange.from, dateRange.to],
@@ -92,184 +95,196 @@ export default function AnalyticsPage() {
   const balanceChartRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadReport = async () => {
-    const workbook = new ExcelJS.Workbook();
-    
-    const captureChart = async (ref: HTMLDivElement | null) => {
-      if (ref) {
-        try {
-          return await htmlToImage.toPng(ref);
-        } catch (error) {
-          console.error('Error capturing chart:', error);
-          return null;
-        }
-      }
-      return null;
-    };
-
-    // Habit Streaks
-    if (habitStreaks) {
-      const ws = workbook.addWorksheet('Habit Streaks');
-      ws.columns = Object.keys(habitStreaks[0]).map(key => ({ 
-        header: key, 
-        key,
-        width: 15 
-      }));
-      ws.addRows(habitStreaks);
-
-      // Add some spacing after data
-      ws.addRow([]);
-      ws.addRow([]);
-
-      // Add chart title
-      const chartTitleRow = ws.addRow(['Habit Streaks Visualization']);
-      chartTitleRow.font = { bold: true, size: 14 };
-      ws.addRow([]);
-
-      // Add chart image
-      const imageData = await captureChart(streaksChartRef.current);
-      if (imageData) {
-        const imageId = workbook.addImage({
-          base64: imageData.split(',')[1],
-          extension: 'png',
-        });
-
-        ws.addImage(imageId, {
-          tl: { col: 0, row: ws.rowCount },
-          ext: { width: 600, height: 400 }
-        });
-        
-        // Add space after chart
-        for (let i = 0; i < 22; i++) {
-          ws.addRow([]);
-        }
-      }
-    }
-
-    // Goal Completion Rate
-    if (goalCompletionRate) {
-      const ws = workbook.addWorksheet('Goal Completion');
-      ws.columns = Object.keys(goalCompletionRate[0]).map(key => ({ 
-        header: key, 
-        key,
-        width: 15 
-      }));
-      ws.addRows(goalCompletionRate);
-
-      ws.addRow([]);
-      ws.addRow([]);
-
-      const chartTitleRow = ws.addRow(['Goal Completion Rate Visualization']);
-      chartTitleRow.font = { bold: true, size: 14 };
-      ws.addRow([]);
-
-      const imageData = await captureChart(completionChartRef.current);
-      if (imageData) {
-        const imageId = workbook.addImage({
-          base64: imageData.split(',')[1],
-          extension: 'png',
-        });
-
-        ws.addImage(imageId, {
-          tl: { col: 0, row: ws.rowCount },
-          ext: { width: 600, height: 400 }
-        });
-        
-        for (let i = 0; i < 22; i++) {
-          ws.addRow([]);
-        }
-      }
-    }
-
-    // Category Distribution
-    if (categoryDistribution) {
-      const ws = workbook.addWorksheet('Category Distribution');
-      ws.columns = Object.keys(categoryDistribution[0]).map(key => ({ 
-        header: key, 
-        key,
-        width: 15 
-      }));
-      ws.addRows(categoryDistribution);
-
-      ws.addRow([]);
-      ws.addRow([]);
-
-      const chartTitleRow = ws.addRow(['Category Distribution Visualization']);
-      chartTitleRow.font = { bold: true, size: 14 };
-      ws.addRow([]);
-
-      const imageData = await captureChart(categoryChartRef.current);
-      if (imageData) {
-        const imageId = workbook.addImage({
-          base64: imageData.split(',')[1],
-          extension: 'png',
-        });
-
-        ws.addImage(imageId, {
-          tl: { col: 0, row: ws.rowCount },
-          ext: { width: 600, height: 400 }
-        });
-        
-        for (let i = 0; i < 22; i++) {
-          ws.addRow([]);
-        }
-      }
-    }
-
-    // Habit Balance
-    if (habitBalance) {
-      const ws = workbook.addWorksheet('Habit Balance');
-      ws.columns = Object.keys(habitBalance).map(key => ({ 
-        header: key, 
-        key,
-        width: 15 
-      }));
-      ws.addRow(habitBalance);
-
-      ws.addRow([]);
-      ws.addRow([]);
-
-      const chartTitleRow = ws.addRow(['Habit Balance Visualization']);
-      chartTitleRow.font = { bold: true, size: 14 };
-      ws.addRow([]);
-
-      const imageData = await captureChart(balanceChartRef.current);
-      if (imageData) {
-        const imageId = workbook.addImage({
-          base64: imageData.split(',')[1],
-          extension: 'png',
-        });
-
-        ws.addImage(imageId, {
-          tl: { col: 0, row: ws.rowCount },
-          ext: { width: 600, height: 400 }
-        });
-        
-        for (let i = 0; i < 22; i++) {
-          ws.addRow([]);
-        }
-      }
-    }
-
-    // Set column widths for all worksheets
-    workbook.worksheets.forEach(worksheet => {
-      // Ensure first column is wide enough for charts
-      worksheet.getColumn(1).width = 80;
+    try {
+      setIsGeneratingReport(true);
+      const workbook = new ExcelJS.Workbook();
       
-      // Set reasonable widths for other columns
-      worksheet.columns.forEach((column: any, index) => {
-        if (index > 0 && !column.width) {
-          column.width = 15;
+      const captureChart = async (ref: HTMLDivElement | null) => {
+        if (ref) {
+          try {
+            return await htmlToImage.toPng(ref);
+          } catch (error) {
+            console.error('Error capturing chart:', error);
+            return null;
+          }
         }
-      });
-    });
+        return null;
+      };
 
-    // Generate and download the file
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-    });
-    const fileName = `habits-report-${format(dateRange.from, 'yyyy-MM-dd')}-to-${format(dateRange.to, 'yyyy-MM-dd')}.xlsx`;
-    saveAs(blob, fileName);
+      // Habit Streaks
+      if (habitStreaks) {
+        const ws = workbook.addWorksheet('Habit Streaks');
+        ws.columns = Object.keys(habitStreaks[0]).map(key => ({ 
+          header: key, 
+          key,
+          width: 15 
+        }));
+        ws.addRows(habitStreaks);
+
+        // Add some spacing after data
+        ws.addRow([]);
+        ws.addRow([]);
+
+        // Add chart title
+        const chartTitleRow = ws.addRow(['Habit Streaks Visualization']);
+        chartTitleRow.font = { bold: true, size: 14 };
+        ws.addRow([]);
+
+        // Add chart image
+        const imageData = await captureChart(streaksChartRef.current);
+        if (imageData) {
+          const imageId = workbook.addImage({
+            base64: imageData.split(',')[1],
+            extension: 'png',
+          });
+
+          ws.addImage(imageId, {
+            tl: { col: 0, row: ws.rowCount },
+            ext: { width: 600, height: 400 }
+          });
+          
+          // Add space after chart
+          for (let i = 0; i < 22; i++) {
+            ws.addRow([]);
+          }
+        }
+      }
+
+      // Goal Completion Rate
+      if (goalCompletionRate) {
+        const ws = workbook.addWorksheet('Goal Completion');
+        ws.columns = Object.keys(goalCompletionRate[0]).map(key => ({ 
+          header: key, 
+          key,
+          width: 15 
+        }));
+        ws.addRows(goalCompletionRate);
+
+        ws.addRow([]);
+        ws.addRow([]);
+
+        const chartTitleRow = ws.addRow(['Goal Completion Rate Visualization']);
+        chartTitleRow.font = { bold: true, size: 14 };
+        ws.addRow([]);
+
+        const imageData = await captureChart(completionChartRef.current);
+        if (imageData) {
+          const imageId = workbook.addImage({
+            base64: imageData.split(',')[1],
+            extension: 'png',
+          });
+
+          ws.addImage(imageId, {
+            tl: { col: 0, row: ws.rowCount },
+            ext: { width: 600, height: 400 }
+          });
+          
+          for (let i = 0; i < 22; i++) {
+            ws.addRow([]);
+          }
+        }
+      }
+
+      // Category Distribution
+      if (categoryDistribution) {
+        const ws = workbook.addWorksheet('Category Distribution');
+        ws.columns = Object.keys(categoryDistribution[0]).map(key => ({ 
+          header: key, 
+          key,
+          width: 15 
+        }));
+        ws.addRows(categoryDistribution);
+
+        ws.addRow([]);
+        ws.addRow([]);
+
+        const chartTitleRow = ws.addRow(['Category Distribution Visualization']);
+        chartTitleRow.font = { bold: true, size: 14 };
+        ws.addRow([]);
+
+        const imageData = await captureChart(categoryChartRef.current);
+        if (imageData) {
+          const imageId = workbook.addImage({
+            base64: imageData.split(',')[1],
+            extension: 'png',
+          });
+
+          ws.addImage(imageId, {
+            tl: { col: 0, row: ws.rowCount },
+            ext: { width: 600, height: 400 }
+          });
+          
+          for (let i = 0; i < 22; i++) {
+            ws.addRow([]);
+          }
+        }
+      }
+
+      // Habit Balance
+      if (habitBalance) {
+        const ws = workbook.addWorksheet('Habit Balance');
+        ws.columns = Object.keys(habitBalance).map(key => ({ 
+          header: key, 
+          key,
+          width: 15 
+        }));
+        ws.addRow(habitBalance);
+
+        ws.addRow([]);
+        ws.addRow([]);
+
+        const chartTitleRow = ws.addRow(['Habit Balance Visualization']);
+        chartTitleRow.font = { bold: true, size: 14 };
+        ws.addRow([]);
+
+        const imageData = await captureChart(balanceChartRef.current);
+        if (imageData) {
+          const imageId = workbook.addImage({
+            base64: imageData.split(',')[1],
+            extension: 'png',
+          });
+
+          ws.addImage(imageId, {
+            tl: { col: 0, row: ws.rowCount },
+            ext: { width: 600, height: 400 }
+          });
+          
+          for (let i = 0; i < 22; i++) {
+            ws.addRow([]);
+          }
+        }
+      }
+
+      // Set column widths for all worksheets
+      workbook.worksheets.forEach(worksheet => {
+        // Ensure first column is wide enough for charts
+        worksheet.getColumn(1).width = 80;
+        
+        // Set reasonable widths for other columns
+        worksheet.columns.forEach((column: any, index) => {
+          if (index > 0 && !column.width) {
+            column.width = 15;
+          }
+        });
+      });
+
+      // Generate and download the file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const fileName = `habits-report-${format(dateRange.from, 'yyyy-MM-dd')}-to-${format(dateRange.to, 'yyyy-MM-dd')}.xlsx`;
+      saveAs(blob, fileName);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   return (
@@ -278,10 +293,24 @@ export default function AnalyticsPage() {
         <h1 className="text-3xl font-bold">{t('analytics.title')}</h1>
         <Button
           onClick={handleDownloadReport}
-          disabled={isLoadingStreaks || isLoadingCategoryDistribution || isLoadingGoalCompletionRate || isLoadingHabitBalance}
+          disabled={
+            isLoadingStreaks || 
+            isLoadingCategoryDistribution || 
+            isLoadingGoalCompletionRate || 
+            isLoadingHabitBalance ||
+            isGeneratingReport
+          }
+          className="flex items-center gap-2"
         >
-          <FileJson className="h-4 w-4" />
-          {t('analytics.export.downloadReport')}
+          {isGeneratingReport ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileJson className="h-4 w-4" />
+          )}
+          {isGeneratingReport 
+            ? t('analytics.export.generatingReport')
+            : t('analytics.export.downloadReport')
+          }
         </Button>
       </div>
 

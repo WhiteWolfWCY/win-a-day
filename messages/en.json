@@ -349,6 +349,7 @@
     },
     "export": {
       "downloadReport": "Report",
+      "generatingReport": "Generating Report...",
       "habitName": "Habit Name",
       "currentStreak": "Current Streak",
       "maxStreak": "Max Streak",

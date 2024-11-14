@@ -362,6 +362,7 @@
     },
     "export": {
       "downloadReport": "Raport",
+      "generatingReport": "Generowanie Raportu...",
       "habitName": "Nazwa Nawyku",
       "currentStreak": "Aktualna Seria",
       "maxStreak": "Najdłuższa Seria",
