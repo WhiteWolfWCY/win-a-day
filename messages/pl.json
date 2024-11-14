@@ -360,6 +360,26 @@
       "goodHabitsPercentage": "{percentage}% Dobrych",
       "habitsCount": "{count} Nawyków"
     },
+    "export": {
+      "downloadReport": "Raport",
+      "habitName": "Nazwa Nawyku",
+      "currentStreak": "Aktualna Seria",
+      "maxStreak": "Najdłuższa Seria",
+      "date": "Data",
+      "completionRate": "Stopień Ukończenia",
+      "category": "Kategoria",
+      "habitCount": "Liczba Nawyków",
+      "metric": "Metryka",
+      "count": "Liczba",
+      "goodHabits": "Dobre Nawyki",
+      "badHabits": "Złe Nawyki",
+      "sheets": {
+        "habitStreaks": "Serie Nawyków",
+        "goalCompletion": "Realizacja Celów",
+        "categories": "Kategorie",
+        "habitBalance": "Bilans Nawyków"
+      }
+    },
     "charts": {
       "dateFormat": {
         "short": "dd MMM",

@@ -347,6 +347,26 @@
       "to": "To",
       "pickDate": "Pick a date"
     },
+    "export": {
+      "downloadReport": "Report",
+      "habitName": "Habit Name",
+      "currentStreak": "Current Streak",
+      "maxStreak": "Max Streak",
+      "date": "Date",
+      "completionRate": "Completion Rate",
+      "category": "Category",
+      "habitCount": "Habit Count",
+      "metric": "Metric",
+      "count": "Count",
+      "goodHabits": "Good Habits",
+      "badHabits": "Bad Habits",
+      "sheets": {
+        "habitStreaks": "Habit Streaks",
+        "goalCompletion": "Goal Completion",
+        "categories": "Categories",
+        "habitBalance": "Habit Balance"
+      }
+    },
     "cards": {
       "totalHabits": "Total Habits",
       "goodHabitCompletion": "Good Habit Completion",
