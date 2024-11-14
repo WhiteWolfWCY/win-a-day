@@ -1,6 +1,7 @@
 import { openai } from '@/lib/openai';
 import { getUserHabits, getAllUserGoals } from '@/actions/actions';
 import { NextResponse } from 'next/server';
+import { getLocale } from 'next-intl/dist/types/src/server/react-server';
 
 export async function POST(
   req: Request,
@@ -8,7 +9,6 @@ export async function POST(
 ) {
   try {
     const { userId } = await req.json();
-    const locale = params.locale;
     
     // Get user's habits and goals
     const habits = await getUserHabits(userId);
@@ -19,7 +19,7 @@ export async function POST(
         {
           role: "system",
           content: `You are a habit-building and personal development expert. Based on the user's current habits and goals, suggest new habits and goals that would complement their journey.
-          Please provide your response in ${locale === 'en' ? 'English' : 'Polish'} language.
+          Please provide your response in the same language user is using.
           Format your response as a JSON object with two arrays: 'habits' and 'goals'.
           Each habit and goal should have a 'name' and 'reason' property.
           Limit to 3 habits and 3 goals maximum.`

@@ -181,7 +181,8 @@
       "frequencies": {
         "daily": "Codziennie",
         "weekly": "Tygodniowo",
-        "monthly": "Miesięcznie"
+        "monthly": "Miesięcznie",
+        "never": "Nigdy"
       }
     },
     "categories": {
@@ -200,6 +201,8 @@
       "createSuccessDesc": "Twoja nowa kategoria została pomyślnie dodana.",
       "createError": "Nie udało się utworzyć kategorii. Spróbuj ponownie.",
       "updateSuccess": "Kategoria zaktualizowana",
+      "updateButton": "Aktualizuj Kategorię",
+      "deleteTitle": "Usuń Kategorię",
       "updateSuccessDesc": "Twoja kategoria została pomyślnie zaktualizowana.",
       "updateError": "Nie udało się zaktualizować kategorii. Spróbuj ponownie.",
       "name": "Nazwa Kategorii",
@@ -287,6 +290,7 @@
       "finishDate": "Data Zakończenia",
       "days": "Dni",
       "progress": "Postęp",
+      "inProgress": "W trakcie",
       "completed": "Ukończony",
       "successes": "sukcesów",
       "pastDue": "Po terminie"

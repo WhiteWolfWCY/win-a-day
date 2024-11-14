@@ -1,6 +1,7 @@
 import { openai } from '@/lib/openai';
 import { getUserHabits, getAllUserGoals } from '@/actions/actions';
 import { NextResponse } from 'next/server';
+import { getLocale } from 'next-intl/dist/types/src/server/react-server';
 
 export async function POST(
   req: Request,
@@ -8,7 +9,6 @@ export async function POST(
 ) {
   try {
     const { userId, message, history } = await req.json();
-    const locale = params.locale;
     
     // Get user's habits and goals for context
     const habits = await getUserHabits(userId);
@@ -20,7 +20,7 @@ export async function POST(
           role: "system",
           content: `You are a helpful AI assistant specializing in habit formation and goal achievement.
           You have access to the user's current habits and goals for context.
-          Please provide your response in ${locale === 'en' ? 'English' : 'Polish'} language.
+          Please provide your response in the same language user is using.
           Be encouraging and supportive while providing practical advice.
           Format your responses using markdown for better readability.
           If the message is not about habits or goals, or personal development, respond with "I'm sorry, I can only help with habits and goals.

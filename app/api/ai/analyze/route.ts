@@ -1,6 +1,7 @@
 import { openai } from '@/lib/openai';
 import { getUserHabits, getAllUserGoals } from '@/actions/actions';
 import { NextResponse } from 'next/server';
+import { getLocale } from 'next-intl/server';
 
 export async function POST(
   req: Request,
@@ -8,7 +9,6 @@ export async function POST(
 ) {
   try {
     const { userId } = await req.json();
-    const locale = params.locale;
     
     // Get user's habits and goals
     const habits = await getUserHabits(userId);
@@ -19,7 +19,7 @@ export async function POST(
         {
           role: "system",
           content: `You are a habit-building and personal development expert. Analyze the user's habits and goals to provide insightful recommendations. 
-          Please provide your response in ${locale === 'en' ? 'English' : 'Polish'} language.
+          Please provide your response in the same language user is using.
           Format your response in markdown with proper headings, lists, and emphasis.`
         },
         {
@@ -34,7 +34,6 @@ export async function POST(
               name: g.name,
               success: g.completedAttempts / g.goalSuccess
             })),
-            language: locale
           })
         }
       ],

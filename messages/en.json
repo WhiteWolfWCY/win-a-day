@@ -176,7 +176,8 @@
       "frequencies": {
         "daily": "Daily",
         "weekly": "Weekly",
-        "monthly": "Monthly"
+        "monthly": "Monthly",
+        "never": "Never"
       }
     },
     "categories": {
@@ -195,6 +196,8 @@
       "createSuccessDesc": "Your new category has been successfully added.",
       "createError": "Failed to create category. Please try again.",
       "updateSuccess": "Category updated",
+      "updateButton": "Update Category",
+      "deleteTitle": "Delete Category",
       "updateSuccessDesc": "Your category has been successfully updated.",
       "updateError": "Failed to update category. Please try again.",
       "name": "Category Name",
