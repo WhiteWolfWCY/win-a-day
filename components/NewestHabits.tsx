@@ -89,7 +89,7 @@ export default function NewestHabits() {
                             className="max-w-xs bg-gradient-to-r from-[#FFB800]/10 to-[#FFB800]/5 border border-[#FFB800]/20"
                           >
                             <div className="flex flex-col gap-1">
-                              <p className="text-sm italic">"{habit.quote}"</p>
+                              <p className="text-sm italic">&apos;{habit.quote}&apos;</p>
                               {habit.quoteAuthor && (
                                 <p className="text-xs text-muted-foreground">
                                   - {habit.quoteAuthor}

@@ -25,7 +25,7 @@ import {
 import {getUserNotificationSettings} from "@/actions/notifications"
 import {getCurrentStreak, getAchievements} from "@/actions/achievements"
 import {getLeaderboard, getUserProfile} from "@/actions/stats"
-import { Habits, Categories, Goals, GoalsAttempts, Users, GoalPriority, WeekDays } from '@/db/schema';
+import { Habits, Categories, Goals, GoalsAttempts, Users, GoalPriority, WeekDays, HabitQuotes } from '@/db/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 import { subDays } from 'date-fns';
 import { sql } from 'drizzle-orm/sql';
@@ -117,6 +117,8 @@ describe('Actions', () => {
           habitCategoryId: 'category-1',
           habitCategoryIcon: '🏋️',
           habitType: true,
+          quote: 'Just do it',
+          quoteAuthor: 'Nike',
         },
         {
           habitId: 'habit-2',
@@ -125,13 +127,15 @@ describe('Actions', () => {
           habitCategoryId: 'category-2',
           habitCategoryIcon: '📚',
           habitType: true,
+          quote: null,
+          quoteAuthor: null,
         },
       ];
 
-      // Mock the db calls
+      // Mock the db calls with leftJoin instead of innerJoin
       const selectQueryBuilder = {
         from: jest.fn().mockReturnThis(),
-        innerJoin: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(), // Changed from innerJoin to leftJoin
         where: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockResolvedValueOnce(recentHabits),
@@ -151,12 +155,14 @@ describe('Actions', () => {
         habitCategoryId: Categories.id,
         habitCategoryIcon: Categories.icon,
         habitType: Habits.isGoodHabit,
+        quote: HabitQuotes.quote,
+        quoteAuthor: HabitQuotes.author,
       });
       expect(selectQueryBuilder.from).toHaveBeenCalledWith(Habits);
-      expect(selectQueryBuilder.innerJoin).toHaveBeenCalledWith(Categories, expect.anything());
+      expect(selectQueryBuilder.leftJoin).toHaveBeenCalledTimes(2); // Two left joins
       expect(selectQueryBuilder.where).toHaveBeenCalledWith(eq(Habits.userId, userId));
       expect(selectQueryBuilder.orderBy).toHaveBeenCalledWith(expect.anything());
-      expect(selectQueryBuilder.limit).toHaveBeenCalledWith(4);
+      expect(selectQueryBuilder.limit).toHaveBeenCalledWith(5);
     });
   });
 
