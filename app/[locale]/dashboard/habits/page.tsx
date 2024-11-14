@@ -7,7 +7,7 @@ import { getAllHabitsForUser } from "@/actions/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, Plus } from "lucide-react";
+import { CheckCircle2, XCircle, Plus, Sparkles, Quote } from "lucide-react";
 import Loader from "@/components/Loader";
 import HabitMenu from "@/components/HabitOptionsDropdown";
 import AddHabitDialog from "@/components/AddHabitDialog";
@@ -20,11 +20,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useTranslations } from 'next-intl';
+import QuotesDialog from "@/components/QuotesDialog";
 
 export default function HabitsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isQuotesDialogOpen, setIsQuotesDialogOpen] = useState(false);
   const { userId } = useAuth();
   const t = useTranslations();
   const itemsPerPage = 10;
@@ -48,9 +50,22 @@ export default function HabitsPage() {
 
   return (
     <main className="container mx-auto flex-grow flex flex-col gap-6 p-6 z-10">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        <Button 
+          variant="outline"
+          className="bg-[#FFB800] hover:bg-[#ffc933] text-black border-none shadow-lg hover:shadow-xl transition-all duration-300 rounded-full px-6"
+          onClick={() => setIsQuotesDialogOpen(true)}
+        >
+          <Sparkles className="mr-2 h-4 w-4" />
+          Need Motivation?
+        </Button>
+      </div>
+
       <Card className="bg-opacity-80 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-2xl font-bold">{t('habits.title')}</CardTitle>
+          <div className="flex items-center gap-4">
+            <CardTitle className="text-2xl font-bold">{t('habits.title')}</CardTitle>
+          </div>
           <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> {t('habits.addHabit')}
           </Button>
@@ -137,10 +152,15 @@ export default function HabitsPage() {
           )}
         </CardContent>
       </Card>
+
       <AddHabitDialog
         isDialogOpen={isDialogOpen}
         setIsDialogOpen={setIsDialogOpen}
         showAddButton={false}
+      />
+      <QuotesDialog 
+        open={isQuotesDialogOpen} 
+        onOpenChange={setIsQuotesDialogOpen} 
       />
     </main>
   );

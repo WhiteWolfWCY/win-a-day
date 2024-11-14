@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays, Achievements, UserAchievements, AchievementCategory, GoogleCalendarTokens, GoalCalendarSync } from "@/db/schema";
+import { GoalsAttempts, Goals, Habits, Categories, Users, GoalPriority, WeekDays, Achievements, UserAchievements, AchievementCategory, GoogleCalendarTokens, GoalCalendarSync, HabitQuotes } from "@/db/schema";
 import { eq, and, desc, sql, inArray, gte, lte, or, lt, gt, notInArray } from "drizzle-orm";
 import { InferInsertModel } from 'drizzle-orm';
 import { parseISO, subDays, startOfDay, endOfDay } from 'date-fns';
@@ -99,20 +99,30 @@ export async function getAllHabitsForUser(userId: string) {
 
 // get 4 recent habits
 export async function getRecentHabitsForUser(userId: string) {
-  const habits = await db.select({
-    habitId: Habits.id,
-    habitName: Habits.name,
-    habitCategory: Categories.name,
-    habitCategoryId: Categories.id, 
-    habitCategoryIcon: Categories.icon,
-    habitType: Habits.isGoodHabit,
-  }).from(Habits)
-    .innerJoin(Categories, eq(Habits.categoryId, Categories.id))
-    .where(eq(Habits.userId, userId))
-    .orderBy(desc(Habits.createdAt))
-    .limit(4);
-  
-  return habits;
+  try {
+    const habits = await db
+      .select({
+        habitId: Habits.id,
+        habitName: Habits.name,
+        habitType: Habits.isGoodHabit,
+        habitCategory: Categories.name,
+        habitCategoryId: Categories.id,
+        habitCategoryIcon: Categories.icon,
+        quote: HabitQuotes.quote,
+        quoteAuthor: HabitQuotes.author,
+      })
+      .from(Habits)
+      .leftJoin(Categories, eq(Habits.categoryId, Categories.id))
+      .leftJoin(HabitQuotes, eq(Habits.id, HabitQuotes.habitId))
+      .where(eq(Habits.userId, userId))
+      .orderBy(desc(Habits.createdAt))
+      .limit(5);
+
+    return habits;
+  } catch (error) {
+    console.error('Error fetching habits:', error);
+    throw error;
+  }
 }
 
 //get user habits

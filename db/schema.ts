@@ -175,3 +175,11 @@ export const GoalCalendarSync = pgTable("goal_calendar_sync", {
   unq: uniqueIndex('goal_calendar_sync_goal_user_unique').on(table.goalId, table.userId)
 }));
 
+export const HabitQuotes = pgTable("habit_quotes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  habitId: uuid("habitId").references(() => Habits.id),
+  quote: text("quote").notNull(),
+  author: text("author").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
