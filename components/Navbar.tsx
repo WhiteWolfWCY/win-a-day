@@ -14,7 +14,7 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from 'next-intl';
 
@@ -23,13 +23,14 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const t = useTranslations('navigation');
   const locale = useLocale();
+  const params = useParams();
 
   const navItems = [
-    { href: "/dashboard/home", icon: Home, label: t('dashboard') },
-    { href: "/dashboard/habits", icon: CheckCircle, label: t('habits') },
-    { href: "/dashboard/goals", icon: Goal, label: t('goals') },
-    { href: "/dashboard/community", icon: Users, label: t('community') },
-    { href: "/dashboard/analytics", icon: BarChart2, label: t('analytics') }
+    { href: "/home", icon: Home, label: t('dashboard') },
+    { href: "/habits", icon: CheckCircle, label: t('habits') },
+    { href: "/goals", icon: Goal, label: t('goals') },
+    { href: "/community", icon: Users, label: t('community') },
+    { href: "/analytics", icon: BarChart2, label: t('analytics') }
   ];
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function Navbar() {
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                href={item.href}
+                href={`/${locale}/dashboard/${item.href}`}
                 className={cn(
                   "flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors",
                   pathname === item.href && "text-primary"
@@ -111,7 +112,7 @@ export default function Navbar() {
           {navItems.map((item) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={`/${locale}/dashboard/${item.href}`}
               className={cn(
                 "flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors p-2",
                 pathname === item.href && "text-primary"

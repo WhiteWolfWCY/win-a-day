@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Toaster } from "@/components/ui/toaster";
 import { AIAssistant } from "@/components/AIAssistant";
 import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function DashboardLayout({
@@ -17,12 +17,14 @@ export default function DashboardLayout({
 }>) {
   const { userId, isLoaded } = useAuth();
   const router = useRouter();
+  const params = useParams();
 
   useEffect(() => {
     if (isLoaded && !userId) {
-      router.push('/sign-in');
+      const locale = params.locale || 'en';
+      router.push(`/${locale}/sign-in`);
     }
-  }, [isLoaded, userId, router]);
+  }, [isLoaded, userId, router, params.locale]);
 
   if (!isLoaded || !userId) {
     return null;
